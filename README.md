@@ -33,7 +33,7 @@ where2meet/
 │   └── mockups/       # 화면 목업 V1~V5
 ├── index.html         # 첫 화면
 ├── src/               # JS·CSS 소스
-├── public/            # 이미지 등 정적 파일
+├── assets/            # 이미지 등 정적 파일
 ├── CLAUDE.md          # AI 도구용 프로젝트 안내
 └── README.md
 ```

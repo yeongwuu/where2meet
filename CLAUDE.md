@@ -14,7 +14,7 @@
 - `index.html` 첫 화면 (저장소 맨 바깥)
 - `src/css/tokens.css` 디자인 토큰 (색·간격 값은 여기만), `src/css/base.css` 공통 컴포넌트, `src/css/<화면>.css` 화면 전용
 - `src/js/labels.js` 코드값 → 화면 이름, `src/js/<화면>.js` 화면별 동작
-- `public/` 이미지 등 정적 파일
+- `assets/` 이미지 등 정적 파일 (`public/` 폴더는 만들지 말 것: Vercel이 그 폴더만 배포해서 404가 남)
 
 ## 작업 방식
 - 브랜치를 만들지 말고 `main`에서만 작업할 것
