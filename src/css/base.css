@@ -1,0 +1,340 @@
+/* 공통 컴포넌트: docs/design.md 3장 기준. 모든 화면에서 같이 써요. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* 페이지 틀: 모바일 기준, PC에서도 가운데 폰 화면처럼 */
+.page {
+  max-width: var(--page-max);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--bg-subtle);
+  padding-bottom: 96px; /* 하단 CTA 바 높이만큼 */
+}
+
+.page-body {
+  padding: var(--space-16) var(--gutter) var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* 글자 */
+.display {
+  margin: 0;
+  color: var(--ink);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.heading {
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.caption {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 아이콘 (Lucide 선 아이콘) */
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* 카드 */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-16);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+
+/* 번호 섹션 카드의 검정 원 번호 */
+.step-num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+
+/* 상태 배지 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.badge-soft {
+  background: var(--primary-soft);
+  color: var(--primary-pressed);
+}
+
+/* 입력 */
+.field + .field {
+  margin-top: var(--space-16);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: var(--space-8);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field-label .hint {
+  color: var(--text-sub);
+  font-weight: 500;
+  margin-left: var(--space-4);
+}
+
+.input {
+  display: block;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  font-size: 15px;
+}
+
+.input::placeholder {
+  color: var(--text-disabled);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field-error {
+  margin: var(--space-4) 0 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+/* 선택 칩 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  /* 칩이 36px이라 위아래로 터치 영역을 넓혀 44px 맞춤 */
+  position: relative;
+}
+
+.chip::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.chip:hover {
+  border-color: var(--text-disabled);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.chips-sm .chip {
+  min-height: 30px;
+  padding: 0 12px;
+}
+
+.chips-sm .chip::after {
+  inset: -7px 0;
+}
+
+/* 안내 문구 (자물쇠 등 아이콘과 함께) */
+.note {
+  display: flex;
+  gap: var(--space-4);
+  margin: var(--space-8) 0 0;
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.note .icon {
+  margin-top: 1px;
+}
+
+.note-caution {
+  color: var(--caution);
+}
+
+/* 버튼 */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--primary);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: var(--primary-pressed);
+}
+
+.btn-primary:active {
+  background: var(--primary-pressed);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* 하단 고정 CTA 바 */
+.cta-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-12) var(--gutter);
+  padding-bottom: calc(var(--space-12) + env(safe-area-inset-bottom));
+  background: var(--bg);
+  box-shadow: var(--shadow-cta);
+}
+
+/* 짧게 떴다 사라지는 안내 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  z-index: 20;
+  width: max-content;
+  max-width: calc(min(100vw, var(--page-max)) - 2 * var(--gutter));
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14px;
+  transform: translate(-50%, 8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: none;
+  }
+}

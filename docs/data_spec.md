@@ -21,20 +21,20 @@
 ### 2-1. 음식 `food_*`
 | 코드 | 화면 이름 |
 |---|---|
-| `food_korean_bbq` | 고기·구이 |
+| `food_korean_bbq` | 고기구이 |
 | `food_korean_stew` | 한식·찌개 |
 | `food_japanese` | 일식 |
 | `food_chinese` | 중식 |
 | `food_western` | 양식 |
-| `food_seafood` | 해산물·횟집 |
+| `food_seafood` | 해산물 |
 | `food_chicken_pub` | 치킨·호프 |
 | `food_asian` | 아시안 |
 
 ### 2-2. 못 먹는 것: 알레르기 `allergy_*`
 | 코드 | 화면 이름 |
 |---|---|
-| `allergy_crustacean` | 갑각류 (새우·게) |
-| `allergy_mollusk` | 조개·오징어류 |
+| `allergy_crustacean` | 갑각류 |
+| `allergy_mollusk` | 조개·연체류 |
 | `allergy_fish` | 생선 |
 | `allergy_nut` | 견과류 |
 | `allergy_wheat` | 밀 |
@@ -50,7 +50,7 @@
 | 코드 | 화면 이름 (사람) | 화면 이름 (식당) |
 |---|---|---|
 | `drink_none` | 술 안 마셔요 | 식사 중심 |
-| `drink_light` | 반주 정도 | 반주 가능 |
+| `drink_light` | 가볍게 한두 잔 | 반주 가능 |
 | `drink_enjoy` | 술자리 좋아요 | 술자리 중심 |
 
 ### 2-5. 분위기 `mood_*`
@@ -60,7 +60,17 @@
 | `mood_lively` | 활기찬 곳 |
 | `mood_any` | 상관없어요 |
 
-> 화면 이름은 초안이에요. 바꾸려면 이 표만 고치고, 코드에서는 이 표를 한곳(예: `labels.js`)에 모아 써요.
+### 2-6. 직급 `rank_*`
+| 코드 | 화면 이름 |
+|---|---|
+| `rank_associate` | 사원·어소시에이트 |
+| `rank_senior` | 선임 |
+| `rank_manager` | 매니저 |
+| `rank_director` | 디렉터 |
+| `rank_partner` | 파트너·임원 |
+
+> 화면 이름은 목업(V1) 문구 기준이에요. 코드에서는 `src/js/labels.js`에 같은 표가 있어요. 바꿀 때는 둘 다 고쳐요.
+> 알레르기·식이 제한의 "해당 없어요"는 화면에서만 쓰는 선택지예요. 저장할 때는 빈 배열 `[]`이에요.
 
 ---
 
@@ -162,6 +172,6 @@
 ---
 
 ## 5. 아직 정하지 않은 것
-- `members.json`에 **직급·상사/임원 여부, 팀** 필드가 없어요. ②의 팀 그룹과 배지, 4-3의 룸 가점에 필요해요.
-- `members.json`에 **별로(`dislikes`)** 필드가 없어요. ③ 취향 막대의 "별로 n"에 필요해요.
+- `members.json`에 **직급(`rank`)·팀** 필드가 없어요. ① 화면은 `rank`를 저장하지만 샘플 데이터에는 아직 없어요. ②의 팀 그룹과 배지, 4-3의 룸 가점에 필요해요.
+- `members.json`에 **별로(`dislikes`)** 필드가 없어요. ① 화면은 저장하지만 샘플 데이터에는 아직 없어요. ③ 취향 막대의 "별로 n"에 필요해요.
 - 식당의 영업시간·주차·확인일(④ 펼친 카드)과 위치(② "어디서") 필드가 없어요.
