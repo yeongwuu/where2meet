@@ -17,6 +17,7 @@
 - `assets/` 이미지 등 정적 파일 (`public/` 폴더는 만들지 말 것: Vercel이 그 폴더만 배포해서 404가 남)
 
 ## 작업 방식
+- 배포: `main`에 push하면 Vercel이 https://where2meet-pit-stop.vercel.app 에 자동 배포함
 - 브랜치를 만들지 말고 `main`에서만 작업할 것
 - 작업 전 `git pull`로 최신 내용을 받고, 끝나면 커밋 후 `git push`할 것
 - React 등 프레임워크 없이 바닐라 HTML·CSS·JS로 만들 것 (빌드 도구 없음, ES 모듈 사용)

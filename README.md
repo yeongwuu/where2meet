@@ -1,5 +1,7 @@
 # 어디서 모여? (where2meet)
 
+**사이트:** https://where2meet-pit-stop.vercel.app
+
 회식·모임에 같이 갈 사람들의 프로필(못 먹는 것, 음식 취향, 술·분위기)을 모아서 모두에게 맞는 식당을 추천해 주는 사내 도구.
 
 ## 문서
@@ -47,7 +49,7 @@ where2meet/
 python3 -m http.server 5173
 ```
 
-배포: `main`에 push하면 Vercel이 자동으로 다시 배포해요.
+배포: `main`에 push하면 Vercel이 자동으로 다시 배포해요. 1분쯤 뒤 https://where2meet-pit-stop.vercel.app 에 반영돼요.
 
 ## 화면 진행 상황
 | 화면 | 파일 | 상태 |
