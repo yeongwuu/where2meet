@@ -19,7 +19,9 @@
 ## 작업 방식
 - 배포: `main`에 push하면 Vercel이 https://where2meet-pit-stop.vercel.app 에 자동 배포함
 - 브랜치를 만들지 말고 `main`에서만 작업할 것
-- 작업 전 `git pull`로 최신 내용을 받고, 끝나면 커밋 후 `git push`할 것
+- 작업 전 `git pull`로 최신 내용을 받을 것
+- 작업이 끝나면 커밋까지만 하고, `git push`는 사용자가 "올려줘"라고 할 때만 할 것 (push하면 바로 실제 사이트에 반영되기 때문)
+- push 전에는 `git pull`로 다른 사람 작업을 먼저 합치고, 충돌이 나면 어느 쪽을 남길지 사용자에게 물어볼 것
 - React 등 프레임워크 없이 바닐라 HTML·CSS·JS로 만들 것 (빌드 도구 없음, ES 모듈 사용)
 - JSON을 `fetch`로 읽기 때문에 파일을 더블클릭하면 안 되고, 로컬 서버로 열어야 함: `python3 -m http.server 5173` → http://localhost:5173
 - 로그인(GitHub 인증 등)이 필요하면 사용자에게 단계별로 안내할 것
