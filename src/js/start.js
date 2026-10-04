@@ -2,7 +2,7 @@
 import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE } from "./labels.js";
 import { KEYS, load, save, loadData, goTo, toast } from "./common.js";
 
-const DEMO_INVITE_CODE = "DEMO-2026";
+const INVITE_CODE = "Fit-stop"; // 사내초대코드. 처음 온 사람에게는 미리 채워 둬요
 const TRIAL_MEMBER_ID = "p01"; // 체험 계정: 가상 동료 '하늘'
 
 // 칩 그룹별 선택지. "해당 없어요"는 알레르기·식이 제한에만 있어요.
@@ -111,7 +111,7 @@ function validate() {
   if (!code.value.trim()) {
     showError("invite-code-error", "사내초대코드를 입력해 주세요", code);
     firstInvalid ??= code;
-  } else if (code.value.trim().toUpperCase() !== DEMO_INVITE_CODE) {
+  } else if (code.value.trim().toLowerCase() !== INVITE_CODE.toLowerCase()) {
     showError("invite-code-error", "코드가 맞지 않아요. 다시 확인해 주세요", code);
     firstInvalid ??= code;
   }
@@ -176,7 +176,7 @@ async function loadTrialProfile() {
 
 const savedProfile = load(KEYS.profile);
 renderChips();
-fillForm(savedProfile ?? {}, savedProfile?.inviteCode);
+fillForm(savedProfile ?? {}, INVITE_CODE);
 if (!savedProfile) {
   // 처음 온 사람은 못 먹는 것을 직접 고르게 비워 둬요
   setSelected("allergies", []);
@@ -198,9 +198,9 @@ form.addEventListener("submit", (event) => {
 document.getElementById("trial-start").addEventListener("click", async () => {
   try {
     const trial = await loadTrialProfile();
-    fillForm(trial, DEMO_INVITE_CODE);
+    fillForm(trial, INVITE_CODE);
     // 소속 팀은 ②에서 직접 고르게 비워 둬요
-    save(KEYS.profile, { ...readForm(), id: trial.id, inviteCode: DEMO_INVITE_CODE });
+    save(KEYS.profile, { ...readForm(), id: trial.id, inviteCode: INVITE_CODE });
     goTo("meeting");
   } catch {
     toast("체험 계정을 불러오지 못했어요. 잠시 후 다시 눌러 주세요");
