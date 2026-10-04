@@ -27,6 +27,11 @@ const DRINK_CONCLUSION = {
   drink_light: "반주 정도의 식사 중심",
   drink_enjoy: "술자리 중심",
 };
+// 가장 많은 분위기 → 결론 앞부분 ("조용한 곳에서 …"). 상관없어요는 붙이지 않아요
+const MOOD_CONCLUSION = {
+  mood_quiet: "조용한 곳",
+  mood_lively: "활기찬 곳",
+};
 
 let people = [];
 let wholeTeam = false; // 소속 팀 사람을 모두 골랐는지 ("3팀 전원")
@@ -179,11 +184,25 @@ function renderDrink() {
   document.getElementById("ratio-drink").innerHTML = ratioBar("술", DRINK_PARTS, drinks);
   document.getElementById("ratio-mood").innerHTML = ratioBar("분위기", MOOD_PARTS, moods);
 
-  // 가장 많은 값. 같으면 술을 덜 마시는 쪽으로 (부담 덜어주기)
-  const top = DRINK_PARTS.reduce((best, [code]) => ((drinks[code] ?? 0) > (drinks[best] ?? 0) ? code : best), DRINK_PARTS[0][0]);
-  document.getElementById("drink-conclusion").innerHTML = drinks[top]
-    ? `→ <strong>${DRINK_CONCLUSION[top]}</strong> 자리를 추천할게요`
+  const drink = topDrink(drinks);
+  const mood = topMood(moods);
+  const place = mood === "mood_any" ? "" : `${MOOD_CONCLUSION[mood]}에서 `;
+  document.getElementById("drink-conclusion").innerHTML = drink
+    ? `→ <strong>${place}${DRINK_CONCLUSION[drink]}</strong> 자리를 추천할게요`
     : "술·분위기를 입력한 사람이 없어서 결론을 내지 않았어요";
+}
+
+// 가장 많은 술 성향. 같으면 술을 덜 마시는 쪽으로 (부담 덜어주기). 아무도 없으면 null
+function topDrink(counts) {
+  // DRINK_PARTS가 덜 마시는 순서라, 더 많을 때만 바꾸면 같을 때 앞쪽이 남아요
+  return DRINK_PARTS.reduce((best, [code]) => ((counts[code] ?? 0) > (best ? counts[best] : 0) ? code : best), null);
+}
+
+// 가장 많은 분위기. 조용한 곳·활기찬 곳이 같거나 상관없어요와 같으면 상관없어요(중립)
+function topMood(counts) {
+  const max = Math.max(0, ...MOOD_PARTS.map(([code]) => counts[code] ?? 0));
+  const tops = MOOD_PARTS.map(([code]) => code).filter((code) => max > 0 && (counts[code] ?? 0) === max);
+  return tops.length === 1 ? tops[0] : "mood_any";
 }
 
 // ---------- 취향 모름 ----------
