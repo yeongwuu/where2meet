@@ -134,11 +134,18 @@ function setTeam(team) {
   save(KEYS.profile, { ...load(KEYS.profile), team: team || undefined });
 }
 
+// 취향 상태 배지. 미입력은 눌러서 입력을 부탁할 수 있어요
+function statusBadge(person) {
+  if (person.is_member) return `<span class="badge badge-check">${icon("check")}취향 입력 완료</span>`;
+  const requested = load(KEYS.requests)?.[person.id];
+  if (requested) {
+    return `<button type="button" class="badge badge-subtle badge-btn" data-request="${person.id}" aria-label="${person.nickname} 님에게 취향 입력을 부탁했어요">요청함</button>`;
+  }
+  return `<button type="button" class="badge badge-caution badge-btn" data-request="${person.id}" aria-label="${person.nickname} 님에게 취향 입력 부탁하기">${icon("triangle-alert")}미입력</button>`;
+}
+
 function personRow(person) {
   const role = roleOf(person);
-  const status = person.is_member
-    ? `<span class="badge badge-check">${icon("check")}취향 입력 완료</span>`
-    : `<span class="badge badge-caution">${icon("triangle-alert")}미입력</span>`;
   const self = isSelf(person);
 
   return `
@@ -148,8 +155,8 @@ function personRow(person) {
         <span class="person-name">${person.nickname}${self ? " (나)" : ""}</span>
         <span class="person-rank">${RANK[person.rank] ?? ""}</span>
         ${role ? `<span class="badge badge-soft">${role}</span>` : ""}
-        <span class="person-side">${status}</span>
       </label>
+      <span class="person-side">${statusBadge(person)}</span>
     </li>`;
 }
 
@@ -325,6 +332,8 @@ function onPeopleClick(event) {
     return;
   }
   if (event.target.closest("[data-memo]")) goTo("people");
+  const request = event.target.closest("[data-request]");
+  if (request) askForTaste(members.find((m) => m.id === request.dataset.request), request);
 }
 
 // ---------- 모임 정보 ----------
@@ -447,6 +456,43 @@ function onBudgetInput(event) {
   }
   info.budget = [min, max];
   onChange();
+}
+
+// ---------- 취향 입력 부탁 ----------
+
+const requestDialog = document.getElementById("request-dialog");
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function askForTaste(person, button) {
+  if (!person) return;
+  const requests = load(KEYS.requests) ?? {};
+  if (requests[person.id]) {
+    toast(`${formatTime(requests[person.id])}에 이미 부탁했어요. 입력하면 바로 반영돼요`);
+    return;
+  }
+  document.getElementById("request-title").textContent = `${person.nickname} 님에게 취향 입력을 부탁할까요?`;
+  document.getElementById("request-desc").textContent =
+    "못 먹는 것과 좋아하는 음식을 1분 안에 입력할 수 있는 링크를 보내요. 입력하면 이 모임 추천에 바로 반영돼요.";
+  requestDialog.returnValue = "";
+  requestDialog.showModal();
+  requestDialog.addEventListener(
+    "close",
+    () => {
+      if (requestDialog.returnValue === "yes") {
+        save(KEYS.requests, { ...requests, [person.id]: new Date().toISOString() });
+        renderPeople();
+        toast(`${person.nickname} 님에게 취향 입력을 부탁했어요`);
+        document.querySelector(`[data-request="${person.id}"]`)?.focus();
+      } else {
+        button.focus();
+      }
+    },
+    { once: true },
+  );
 }
 
 // ---------- 비회원 추가 ----------

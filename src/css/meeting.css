@@ -214,6 +214,33 @@
   flex: none;
 }
 
+/* 미입력 배지 버튼: 눌러서 취향 입력을 부탁해요 */
+.badge-btn {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+}
+
+.badge-btn::after {
+  content: "";
+  position: absolute;
+  inset: -11px -4px;
+}
+
+.badge-btn:hover {
+  text-decoration: underline;
+}
+
+.badge-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.guest-relation-hint {
+  margin-top: var(--space-8);
+}
+
 .person-memo {
   flex: none;
   min-height: 44px;
