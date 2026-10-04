@@ -23,6 +23,8 @@ const form = document.getElementById("meeting-form");
 const teamsEl = document.getElementById("teams");
 const guestsEl = document.getElementById("guests");
 const searchInput = document.getElementById("people-search");
+const guestSearch = document.getElementById("guest-search");
+const GUEST_LIMIT = 30; // 검색 결과가 너무 많으면 이만큼만 보여 줘요
 const teamPicker = document.getElementById("team-picker");
 const teamOptions = document.getElementById("team-options");
 
@@ -143,7 +145,7 @@ function personRow(person) {
 
 function guestRow(guest) {
   return `
-    <li class="person" data-id="${guest.id}" data-search="${guest.title} ${guest.relation}">
+    <li class="person" data-id="${guest.id}">
       <label>
         <input type="checkbox" class="checkbox" data-person="${guest.id}" ${selected.has(guest.id) ? "checked" : ""}>
         <span class="person-name">${guest.title}</span>
@@ -206,7 +208,7 @@ function renderPeople() {
     teamsEl.innerHTML = teams.map(teamBlock).join("");
   }
 
-  guestsEl.innerHTML = guests.map(guestRow).join("");
+  renderGuests();
   syncTeamChecks();
   applySearch();
 }
@@ -255,12 +257,26 @@ function applySearch() {
     document.querySelector(".others-head").hidden = Boolean(q) && !othersEl.querySelector(".team:not([hidden])");
   }
 
-  guestsEl.querySelectorAll(".person").forEach((row) => {
-    row.hidden = Boolean(q) && !row.dataset.search.toLowerCase().includes(q);
-    anyVisible ||= !row.hidden;
-  });
-
   document.getElementById("search-empty").hidden = anyVisible;
+}
+
+// 비회원: 평소에는 고른 사람만, 검색하면 결과를 보여 줘요
+function renderGuests() {
+  const q = guestSearch.value.trim().toLowerCase();
+  const hint = document.getElementById("guest-hint");
+  const matches = (g) => `${g.title} ${g.org} ${g.group} ${g.relation}`.toLowerCase().includes(q);
+  const picked = guests.filter((g) => selected.has(g.id));
+  const found = q ? guests.filter(matches) : [];
+  // 고른 사람을 위에, 검색 결과를 그 아래에
+  const list = q ? [...found.filter((g) => selected.has(g.id)), ...found.filter((g) => !selected.has(g.id))] : picked;
+
+  guestsEl.innerHTML = list.slice(0, GUEST_LIMIT).map(guestRow).join("");
+
+  if (q && found.length === 0) hint.textContent = "찾는 비회원이 없어요";
+  else if (list.length > GUEST_LIMIT) hint.textContent = `${list.length}명 중 ${GUEST_LIMIT}명만 보여요. 더 자세히 검색해 주세요`;
+  else if (!q && picked.length === 0) hint.textContent = "같이 갈 비회원을 호칭·회사·부서로 찾아서 더해요";
+  else hint.textContent = "";
+  hint.hidden = !hint.textContent;
 }
 
 function onPeopleChange(event) {
@@ -493,6 +509,7 @@ async function init() {
   teamsEl.addEventListener("click", onPeopleClick);
   guestsEl.addEventListener("click", onPeopleClick);
   searchInput.addEventListener("input", applySearch);
+  guestSearch.addEventListener("input", renderGuests);
   teamPicker.addEventListener("click", () => openTeamPicker(teamOptions.hidden));
   teamOptions.addEventListener("click", (event) => {
     const chip = event.target.closest("[data-team-option]");

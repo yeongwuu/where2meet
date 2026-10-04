@@ -11,7 +11,7 @@
 - [샘플 데이터](docs/data/): 가상 데이터
   - `members.json`: 회원 120명, 14팀 (Assurance 1~8팀, Tax 1~3팀, Deals 1~3팀. 닉네임, 팀, 직급, 알레르기, 식단, 좋아하는 음식, 술, 분위기)
   - `restaurants.json`: 식당 30곳 (음식 종류, 알레르기 유발 재료, 식단 대응, 룸 여부, 수용 인원, 1인 가격)
-  - `guests.json`: 비회원 (아직 비어 있음)
+  - `guests.json`: 비회원 104명 (사내 백오피스 26명, 고객사 A사~Z사 78명)
   - `reviews.json`: 지난 모임 후기 (아직 비어 있음)
 - [화면 목업](docs/mockups/): V1~V5
 

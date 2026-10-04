@@ -59,7 +59,14 @@
             <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-plus"/></svg>비회원 추가
           </button>
         </div>
+
+        <label class="sr-only" for="guest-search">비회원 검색</label>
+        <div class="search guest-search">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-search"/></svg>
+          <input class="search-input" id="guest-search" type="search" placeholder="호칭·회사·부서 검색 (예: A사, CFO, 인사팀)" autocomplete="off">
+        </div>
         <ul class="person-list" id="guests"></ul>
+        <p class="search-empty caption" id="guest-hint" aria-live="polite"></p>
       </section>
 
       <!-- 모임 정보 -->

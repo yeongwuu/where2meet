@@ -239,6 +239,10 @@
   border-top: 1px solid var(--border);
 }
 
+.guest-search {
+  margin: var(--space-4) 0 var(--space-4);
+}
+
 .guest-title {
   margin: 0;
   color: var(--ink);
