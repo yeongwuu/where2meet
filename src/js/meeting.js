@@ -5,8 +5,9 @@ import { KEYS, PAGES, load, save, loadData, goTo, toast, icon, setupTabBar } fro
 const profile = load(KEYS.profile);
 const SELF_ID = profile?.id ?? "me";
 
-// 처음 들어왔을 때 모임 정보 (데모 흐름: 팀 전체 체크, 목적 팀 회식)
+// 처음 들어왔을 때 모임 정보 (소속 팀은 내 프로필의 팀, 목적 팀 회식)
 const DEFAULT_INFO = {
+  team: "",
   purpose: "purpose_team",
   budget: [0, 40000],
   day: "day_today",
@@ -22,6 +23,7 @@ const form = document.getElementById("meeting-form");
 const teamsEl = document.getElementById("teams");
 const guestsEl = document.getElementById("guests");
 const searchInput = document.getElementById("people-search");
+const teamSelect = document.getElementById("team-select");
 
 let members = []; // 나를 포함한 회원
 let guests = [];
@@ -36,7 +38,6 @@ async function loadPeople() {
 
   // 나: 체험 계정이면 members.json의 내 행을, 직접 가입했으면 내 프로필을 팀 맨 위에
   const self = { ...(allMembers.find((m) => m.id === SELF_ID) ?? {}), ...profile, id: SELF_ID, is_member: true };
-  self.team ??= allMembers[0]?.team ?? "우리 팀";
   members = [self, ...allMembers.filter((m) => m.id !== SELF_ID)];
   guests = allGuests;
 }
@@ -67,8 +68,39 @@ function selectedPeople() {
 
 // ---------- 같이 갈 사람 ----------
 
+function self() {
+  return members[0];
+}
+
+// 팀 목록은 members.json에 나오는 순서. 내 팀은 맨 위에
 function teamNames() {
-  return [...new Set(members.map((m) => m.team))];
+  const all = [...new Set(members.slice(1).map((m) => m.team))];
+  return info.team ? [info.team, ...all.filter((t) => t !== info.team)] : all;
+}
+
+function renderTeamSelect() {
+  // "Assurance 3팀" → 본부 "Assurance"로 묶어요
+  const byDivision = {};
+  [...new Set(members.slice(1).map((m) => m.team))].forEach((team) => {
+    (byDivision[team.split(" ")[0]] ??= []).push(team);
+  });
+  teamSelect.insertAdjacentHTML(
+    "beforeend",
+    Object.entries(byDivision)
+      .map(([division, teams]) => `<optgroup label="${division}">${teams.map((t) => `<option>${t}</option>`).join("")}</optgroup>`)
+      .join(""),
+  );
+}
+
+// 소속 팀 바꾸기: 나를 그 팀에 넣고, 그 팀 사람을 모두 고른 상태로 (비회원 선택은 그대로)
+function setTeam(team) {
+  info.team = team;
+  self().team = team || null;
+  teamSelect.value = team;
+  members.slice(1).forEach((m) => selected.delete(m.id));
+  members.filter((m) => team && m.team === team).forEach((m) => selected.add(m.id));
+  selected.add(SELF_ID);
+  save(KEYS.profile, { ...load(KEYS.profile), team: team || undefined });
 }
 
 function personRow(person) {
@@ -102,43 +134,67 @@ function guestRow(guest) {
     </li>`;
 }
 
-function renderPeople() {
-  teamsEl.innerHTML = teamNames()
-    .map((team, i) => {
-      const list = members.filter((m) => m.team === team);
-      const c = countPeople(list);
-      const open = expandedTeams.has(team);
-      const stats = [
-        `취향 입력 ${c.known}`,
-        c.unknown ? `<span class="is-caution">미입력 ${c.unknown}</span>` : "",
-        c.exec ? `임원 ${c.exec}` : "",
-        c.boss ? `상사 ${c.boss}` : "",
-      ].filter(Boolean);
+function teamBlock(team, i) {
+  const list = members.filter((m) => m.team === team);
+  const c = countPeople(list);
+  const open = expandedTeams.has(team);
+  const stats = [
+    `취향 입력 ${c.known}`,
+    c.unknown ? `<span class="is-caution">미입력 ${c.unknown}</span>` : "",
+    c.exec ? `임원 ${c.exec}` : "",
+    c.boss ? `상사 ${c.boss}` : "",
+  ].filter(Boolean);
 
-      return `
-        <div class="team" data-team="${team}">
-          <div class="team-head">
-            <label class="team-check">
-              <input type="checkbox" class="checkbox" data-team-check="${team}">
-              <span>
-                <span class="team-name">${team} · ${c.total}명 전체</span>
-                <span class="team-stats">${stats.join(" · ")}</span>
-              </span>
-            </label>
-            <button type="button" class="btn-toggle" data-toggle="${team}" aria-expanded="${open}" aria-controls="team-list-${i}">
-              ${open ? "접기" : "펼치기"}${icon("chevron-down")}
-            </button>
-          </div>
-          <ul class="person-list" id="team-list-${i}" ${open ? "" : "hidden"}>
-            ${list.map(personRow).join("")}
-          </ul>
-        </div>`;
-    })
-    .join("");
+  return `
+    <div class="team" data-team="${team}">
+      <div class="team-head">
+        <label class="team-check">
+          <input type="checkbox" class="checkbox" data-team-check="${team}">
+          <span>
+            <span class="team-name">${team} · ${c.total}명 전체</span>
+            <span class="team-stats">${stats.join(" · ")}</span>
+          </span>
+        </label>
+        <button type="button" class="btn-toggle" data-toggle="${team}" aria-expanded="${open}" aria-controls="team-list-${i}">
+          ${open ? "접기" : "펼치기"}${icon("chevron-down")}
+        </button>
+      </div>
+      <ul class="person-list" id="team-list-${i}" ${open ? "" : "hidden"}>
+        ${list.map(personRow).join("")}
+      </ul>
+    </div>`;
+}
+
+let othersOpen = false;
+
+function renderPeople() {
+  const teams = teamNames();
+  if (info.team) {
+    // 내 팀은 바로 보이고, 다른 팀은 한 번에 접어 둬요
+    const others = teams.slice(1);
+    teamsEl.innerHTML = `
+      ${teamBlock(teams[0], 0)}
+      <div class="others-head">
+        <h3 class="other-teams">다른 팀 ${others.length}개</h3>
+        <button type="button" class="btn-toggle" id="others-toggle" aria-expanded="${othersOpen}" aria-controls="other-teams">
+          ${othersOpen ? "접기" : "펼치기"}${icon("chevron-down")}
+        </button>
+      </div>
+      <div id="other-teams" ${othersOpen ? "" : "hidden"}>
+        ${others.map((team, i) => teamBlock(team, i + 1)).join("")}
+      </div>`;
+  } else {
+    teamsEl.innerHTML = teams.map(teamBlock).join("");
+  }
 
   guestsEl.innerHTML = guests.map(guestRow).join("");
   syncTeamChecks();
   applySearch();
+}
+
+function setToggle(button, open) {
+  button.setAttribute("aria-expanded", String(open));
+  button.firstChild.textContent = open ? "접기" : "펼치기";
 }
 
 // 팀 전체 체크박스: 모두 고름 / 일부만 고름(중간 상태) / 아무도 안 고름
@@ -168,9 +224,17 @@ function applySearch() {
     // 검색 중에는 펼쳐서 결과를 보여 줘요
     const open = q ? true : expandedTeams.has(teamEl.dataset.team);
     list.hidden = !open;
-    toggle.setAttribute("aria-expanded", String(open));
+    setToggle(toggle, open);
     anyVisible ||= teamVisible;
   });
+
+  const othersEl = document.getElementById("other-teams");
+  if (othersEl) {
+    const open = Boolean(q) || othersOpen;
+    othersEl.hidden = !open;
+    setToggle(document.getElementById("others-toggle"), open);
+    document.querySelector(".others-head").hidden = Boolean(q) && !othersEl.querySelector(".team:not([hidden])");
+  }
 
   guestsEl.querySelectorAll(".person").forEach((row) => {
     row.hidden = Boolean(q) && !row.dataset.search.toLowerCase().includes(q);
@@ -199,13 +263,19 @@ function onPeopleChange(event) {
 }
 
 function onPeopleClick(event) {
+  const othersToggle = event.target.closest("#others-toggle");
+  if (othersToggle) {
+    othersOpen = !othersOpen;
+    setToggle(othersToggle, othersOpen);
+    document.getElementById("other-teams").hidden = !othersOpen;
+    return;
+  }
   const toggle = event.target.closest("[data-toggle]");
   if (toggle) {
     const team = toggle.dataset.toggle;
     expandedTeams.has(team) ? expandedTeams.delete(team) : expandedTeams.add(team);
     const open = expandedTeams.has(team);
-    toggle.setAttribute("aria-expanded", String(open));
-    toggle.firstChild.textContent = open ? "접기" : "펼치기";
+    setToggle(toggle, open);
     document.getElementById(toggle.getAttribute("aria-controls")).hidden = !open;
     return;
   }
@@ -344,6 +414,7 @@ function onChange() {
 }
 
 function applyMeeting(meeting) {
+  setTeam(meeting.team ?? "");
   selected.clear();
   selected.add(SELF_ID);
   meeting.people.forEach((id) => selected.add(id));
@@ -390,9 +461,9 @@ async function init() {
 
   const draft = load(KEYS.meeting);
 
-  // 기본: 나와 팀 전체를 고른 상태
-  selected.add(SELF_ID);
-  members.forEach((m) => selected.add(m.id));
+  // 기본: 내 프로필의 팀 전체를 고른 상태. 팀을 모르면 직접 고르게 비워 둬요
+  renderTeamSelect();
+  setTeam(profile.team ?? "");
   renderPeople();
   onChange();
   setupResume(draft);
@@ -402,6 +473,11 @@ async function init() {
   teamsEl.addEventListener("click", onPeopleClick);
   guestsEl.addEventListener("click", onPeopleClick);
   searchInput.addEventListener("input", applySearch);
+  teamSelect.addEventListener("change", () => {
+    setTeam(teamSelect.value);
+    renderPeople();
+    onChange();
+  });
   document.getElementById("add-guest").addEventListener("click", () => goTo("people"));
 
   form.addEventListener("click", onInfoClick);

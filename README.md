@@ -9,7 +9,7 @@
 - [디자인 토큰](docs/design_tokens.txt): 컬러, 타이포, 간격, 컴포넌트 값 요약 (Claude Design 첨부용)
 - [데이터·추천 로직](docs/data_spec.md): 데이터 필드, 코드값, 추천 계산 방식
 - [샘플 데이터](docs/data/): 가상 데이터
-  - `members.json`: 참여자 12명 (닉네임, 알레르기, 식단, 좋아하는 음식, 술, 분위기)
+  - `members.json`: 회원 120명, 14팀 (Assurance 1~8팀, Tax 1~3팀, Deals 1~3팀. 닉네임, 팀, 직급, 알레르기, 식단, 좋아하는 음식, 술, 분위기)
   - `restaurants.json`: 식당 30곳 (음식 종류, 알레르기 유발 재료, 식단 대응, 룸 여부, 수용 인원, 1인 가격)
   - `guests.json`: 비회원 (아직 비어 있음)
   - `reviews.json`: 지난 모임 후기 (아직 비어 있음)
