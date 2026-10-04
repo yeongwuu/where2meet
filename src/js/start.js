@@ -199,7 +199,8 @@ document.getElementById("trial-start").addEventListener("click", async () => {
   try {
     const trial = await loadTrialProfile();
     fillForm(trial, DEMO_INVITE_CODE);
-    save(KEYS.profile, { ...readForm(), id: trial.id, team: trial.team, inviteCode: DEMO_INVITE_CODE });
+    // 소속 팀은 ②에서 직접 고르게 비워 둬요
+    save(KEYS.profile, { ...readForm(), id: trial.id, inviteCode: DEMO_INVITE_CODE });
     goTo("meeting");
   } catch {
     toast("체험 계정을 불러오지 못했어요. 잠시 후 다시 눌러 주세요");

@@ -602,7 +602,7 @@ function renderSummary() {
 
   document.getElementById("summary").innerHTML = others
     ? parts.join(" · ")
-    : `<span class="is-caution">같이 갈 사람을 골라 주세요</span>`;
+    : `<span class="is-caution">${info.team ? "같이 갈 사람을 골라 주세요" : "소속 팀을 먼저 골라 주세요"}</span>`;
   document.getElementById("submit").disabled = others === 0;
 }
 
@@ -704,6 +704,8 @@ async function init() {
       teamPicker.focus();
     }
   });
+  // 소속 팀을 아직 안 골랐으면 팀 목록을 펼쳐서 먼저 고르게 해요
+  if (!info.team) openTeamPicker(true);
   // 시간
   renderTimeOptions();
   syncTimePicker();
