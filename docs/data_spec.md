@@ -171,7 +171,7 @@
 | `budget` | [number, number] | 1인 예산 [최소, 최대] 원. 최대 `100000`은 "10만원 이상" |
 | `day` | `day_today` \| `day_tomorrow` \| `day_pick` | 오늘 / 내일 / 날짜 선택 |
 | `date` | string | `day_pick`일 때 `YYYY-MM-DD` |
-| `time` | string | 시간 `HH:MM`. 점심 11:30~13:00, 저녁 17:30~20:00 중에서 골라요 (기본 18:30) |
+| `time` | string | 시간 `HH:MM`. 점심 11:30~13:00, 저녁 17:00~20:00 중에서 골라요 (기본 18:30) |
 | `team` | string | 소속 팀. 이 팀 사람이 처음에 모두 체크돼요 |
 | `place` | `place_*` | 회사 / 신용산역 / 용산역 / 삼각지역 |
 | `walk` | `walk_5` \| `walk_10` \| `walk_15` | 도보 시간 |
