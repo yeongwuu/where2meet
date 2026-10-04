@@ -1,12 +1,12 @@
 """로컬 미리보기 서버. 캐시를 끄기 때문에 파일을 고치고 새로고침하면 바로 반영돼요.
 
-실행: python3 scripts/serve.py  →  http://localhost:5173
+실행: python3 scripts/serve.py  →  http://localhost:5173  (PORT 환경변수로 포트 변경 가능)
 """
 import http.server
 import os
 import socketserver
 
-PORT = 5173
+PORT = int(os.environ.get("PORT", 5173))  # 미리보기 도구가 PORT를 정해 주면 그 포트로
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
