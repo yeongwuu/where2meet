@@ -131,7 +131,22 @@
               <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-chevron-down"/></svg>
             </button>
           </div>
-          <input class="input date-input" id="date" type="date" aria-label="날짜" hidden>
+          <!-- 날짜 선택: 누르면 달력이 펼쳐져요 -->
+          <div class="picker-panel calendar" id="calendar" hidden>
+            <div class="cal-head">
+              <button type="button" class="cal-nav" id="cal-prev" aria-label="이전 달">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-left"/></svg>
+              </button>
+              <p class="cal-title" id="cal-title" aria-live="polite"></p>
+              <button type="button" class="cal-nav" id="cal-next" aria-label="다음 달">
+                <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-right"/></svg>
+              </button>
+            </div>
+            <div class="cal-grid cal-weekdays" aria-hidden="true">
+              <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+            </div>
+            <div class="cal-grid" id="cal-days" role="group" aria-labelledby="cal-title"></div>
+          </div>
           <div class="picker-panel" id="time-options" hidden></div>
         </div>
 

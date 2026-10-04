@@ -353,9 +353,6 @@ function syncChips() {
       chip.setAttribute("aria-pressed", String(info[el.dataset.group] === chip.dataset.value));
     });
   });
-  const dateInput = document.getElementById("date");
-  dateInput.hidden = info.day !== "day_pick";
-  dateInput.value = info.date;
   const pick = form.querySelector('[data-value="day_pick"]');
   pick.textContent = info.day === "day_pick" && info.date ? formatDate(info.date) : DAY.day_pick;
   syncTimePicker();
@@ -393,18 +390,107 @@ function onInfoClick(event) {
   const chip = event.target.closest("[data-group] .chip");
   if (!chip) return;
   const name = chip.closest("[data-group]").dataset.group;
-  info[name] = chip.dataset.value;
+  // "날짜 선택"은 달력만 펼치고, 날짜를 골라야 바뀌어요
   if (name === "day" && chip.dataset.value === "day_pick") {
-    syncChips();
-    const dateInput = document.getElementById("date");
-    dateInput.focus();
-    try {
-      dateInput.showPicker?.();
-    } catch {
-      // 달력을 바로 못 띄우는 브라우저는 입력칸만 보여 줘요
-    }
+    openCalendar(calendar.hidden);
+    return;
   }
+  info[name] = chip.dataset.value;
+  if (name === "day") openCalendar(false);
   onChange();
+}
+
+// ---------- 달력 ----------
+
+const calendar = document.getElementById("calendar");
+const calDays = document.getElementById("cal-days");
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+let calMonth; // 보고 있는 달의 1일
+
+function isoOf(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function today() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function openCalendar(open) {
+  const pick = form.querySelector('[data-value="day_pick"]');
+  pick.setAttribute("aria-expanded", String(open));
+  pick.setAttribute("aria-controls", "calendar");
+  calendar.hidden = !open;
+  if (open) {
+    const base = info.date ? new Date(`${info.date}T00:00`) : today();
+    calMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+    renderCalendar();
+    (calDays.querySelector('[tabindex="0"]') ?? calDays.querySelector(".cal-day:not(:disabled)"))?.focus();
+  }
+}
+
+function renderCalendar() {
+  const y = calMonth.getFullYear();
+  const m = calMonth.getMonth();
+  const first = today();
+  document.getElementById("cal-title").textContent = `${y}년 ${m + 1}월`;
+  document.getElementById("cal-prev").disabled = y === first.getFullYear() && m === first.getMonth();
+
+  const blanks = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  const focusIso = info.date && info.date.startsWith(`${y}-${String(m + 1).padStart(2, "0")}`) ? info.date : null;
+  let cells = "<span></span>".repeat(blanks);
+  for (let d = 1; d <= days; d++) {
+    const date = new Date(y, m, d);
+    const iso = isoOf(date);
+    const past = date < first;
+    const isToday = iso === isoOf(first);
+    const picked = iso === info.date;
+    // 키보드 이동은 고른 날 → 오늘 → 이 달 첫 가능한 날 순서로 시작해요
+    const tab = picked || (!focusIso && isToday) ? 0 : -1;
+    cells += `<button type="button" class="cal-day" data-date="${iso}" tabindex="${tab}"
+      aria-label="${m + 1}월 ${d}일 ${WEEKDAYS[date.getDay()]}요일${isToday ? ", 오늘" : ""}"
+      aria-pressed="${picked}" ${isToday ? 'aria-current="date"' : ""} ${past ? "disabled" : ""}>${d}</button>`;
+  }
+  calDays.innerHTML = cells;
+  if (!calDays.querySelector('[tabindex="0"]')) calDays.querySelector(".cal-day:not(:disabled)")?.setAttribute("tabindex", "0");
+}
+
+function moveMonth(step) {
+  calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + step, 1);
+  renderCalendar();
+}
+
+function pickDate(iso) {
+  info.day = "day_pick";
+  info.date = iso;
+  openCalendar(false);
+  form.querySelector('[data-value="day_pick"]').focus();
+  onChange();
+}
+
+// 화살표: 하루 · 일주일씩 이동, 달이 바뀌면 그 달을 보여 줘요
+function onCalendarKey(event) {
+  const day = event.target.closest(".cal-day");
+  if (event.key === "Escape") {
+    openCalendar(false);
+    form.querySelector('[data-value="day_pick"]').focus();
+    return;
+  }
+  const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[event.key];
+  if (!day || !step) return;
+  event.preventDefault();
+  const next = new Date(`${day.dataset.date}T00:00`);
+  next.setDate(next.getDate() + step);
+  if (next < today()) return;
+  if (next.getMonth() !== calMonth.getMonth()) {
+    calMonth = new Date(next.getFullYear(), next.getMonth(), 1);
+    renderCalendar();
+  }
+  calDays.querySelectorAll(".cal-day").forEach((b) => b.setAttribute("tabindex", "-1"));
+  const target = calDays.querySelector(`[data-date="${isoOf(next)}"]`);
+  target?.setAttribute("tabindex", "0");
+  target?.focus();
 }
 
 // 예산 슬라이더
@@ -755,9 +841,16 @@ async function init() {
     info.budget = [...BUDGET_PRESETS[chip.dataset.preset]];
     onChange();
   });
-  document.getElementById("date").addEventListener("change", (event) => {
-    info.date = event.target.value;
-    onChange();
+  // 달력
+  document.getElementById("cal-prev").addEventListener("click", () => moveMonth(-1));
+  document.getElementById("cal-next").addEventListener("click", () => moveMonth(1));
+  calDays.addEventListener("click", (event) => {
+    const day = event.target.closest(".cal-day");
+    if (day && !day.disabled) pickDate(day.dataset.date);
+  });
+  calendar.addEventListener("keydown", onCalendarKey);
+  document.addEventListener("click", (event) => {
+    if (!calendar.hidden && !event.target.closest('#calendar, [data-value="day_pick"]')) openCalendar(false);
   });
 
   form.addEventListener("submit", (event) => {
