@@ -1,6 +1,6 @@
 // ② 모임 만들기: 같이 갈 사람 고르기 + 모임 정보
 import { RANK, RANK_ROLE, PURPOSE, DAY, TIME_SLOTS, PLACE, WALK, RELATIONS, ALLERGY, DIET, BUDGET_MAX, BUDGET_PRESETS } from "./labels.js";
-import { KEYS, PAGES, load, save, loadData, goTo, toast, icon, setupTabBar } from "./common.js";
+import { KEYS, PAGES, load, save, loadData, goTo, toast, icon, setupTabBar, won, budgetLabel } from "./common.js";
 
 const profile = load(KEYS.profile);
 const SELF_ID = profile?.id ?? "me";
@@ -496,19 +496,6 @@ function onCalendarKey(event) {
 // 예산 슬라이더
 const budgetMin = document.getElementById("budget-min");
 const budgetMax = document.getElementById("budget-max");
-
-function won(n) {
-  if (n >= 10000) return `${n / 10000}만원`;
-  return n === 0 ? "0원" : `${n / 1000}천원`;
-}
-
-function budgetLabel([min, max]) {
-  if (min === 0 && max === BUDGET_MAX) return "상관없음";
-  if (min === max) return won(min);
-  if (max === BUDGET_MAX) return `${won(min)} 이상`;
-  if (min === 0) return `~ ${won(max)}`;
-  return `${won(min)} ~ ${won(max)}`;
-}
 
 function renderBudgetPresets() {
   document.getElementById("budget-presets").innerHTML = Object.keys(BUDGET_PRESETS)

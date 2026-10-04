@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>어디서 모여? · 취향 종합</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="src/css/tokens.css">
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/summary.css">
+  <script type="module" src="src/js/summary.js"></script>
+</head>
+<body>
+  <div class="page">
+    <!-- ③ 취향 종합 -->
+    <header class="page-header">
+      <div class="header-row">
+        <a class="home-link" href="meeting.html" aria-label="모임 만들기로 돌아가기">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-left"/></svg>
+        </a>
+        <h1 class="header-title">취향 종합</h1>
+      </div>
+      <p class="header-sub" id="meeting-sub"></p>
+    </header>
+
+    <main class="page-body" id="summary-body" aria-busy="true">
+      <!-- 통계 타일 -->
+      <dl class="stats">
+        <div class="stat"><dt>참여</dt><dd id="stat-total"></dd></div>
+        <div class="stat"><dt>임원·상사</dt><dd id="stat-role"></dd></div>
+        <div class="stat"><dt>취향 모름</dt><dd id="stat-unknown"></dd></div>
+      </dl>
+
+      <!-- 반드시 피할 것: 끌 수 없음, 이름 숨김 -->
+      <section class="card card-caution" aria-labelledby="sec-avoid">
+        <div class="card-head">
+          <h2 class="heading card-head-title" id="sec-avoid">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-triangle-alert"/></svg>반드시 피할 것
+          </h2>
+          <span class="locked">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-lock"/></svg>끌 수 없어요
+          </span>
+        </div>
+        <ul class="avoid-list" id="avoid-list"></ul>
+        <p class="caption">누구인지는 표시하지 않아요</p>
+      </section>
+
+      <!-- 모임 성격 -->
+      <section class="card" aria-labelledby="sec-character">
+        <div class="card-head">
+          <h2 class="heading" id="sec-character">모임 성격</h2>
+          <button type="button" class="switch" role="switch" data-apply="character" aria-checked="true" aria-label="모임 성격 추천에 반영">
+            <span class="switch-label" aria-hidden="true">반영</span><span class="switch-track"></span>
+          </button>
+        </div>
+        <ul class="lines" id="character-lines"></ul>
+      </section>
+
+      <!-- 다 같이 좋아하는 음식 -->
+      <section class="card" aria-labelledby="sec-food">
+        <div class="card-head">
+          <h2 class="heading" id="sec-food">다 같이 좋아하는 음식</h2>
+          <button type="button" class="switch" role="switch" data-apply="food" aria-checked="true" aria-label="좋아하는 음식 추천에 반영">
+            <span class="switch-label" aria-hidden="true">반영</span><span class="switch-track"></span>
+          </button>
+        </div>
+        <ul class="food-bars" id="food-bars"></ul>
+        <p class="caption" id="food-note"></p>
+      </section>
+
+      <!-- 술·분위기 -->
+      <section class="card" aria-labelledby="sec-drink">
+        <div class="card-head">
+          <h2 class="heading" id="sec-drink">술·분위기</h2>
+          <button type="button" class="switch" role="switch" data-apply="drink" aria-checked="true" aria-label="술·분위기 추천에 반영">
+            <span class="switch-label" aria-hidden="true">반영</span><span class="switch-track"></span>
+          </button>
+        </div>
+        <div id="ratio-drink"></div>
+        <div id="ratio-mood"></div>
+        <p class="conclusion" id="drink-conclusion"></p>
+      </section>
+
+      <!-- 취향 모름: 있을 때만 -->
+      <section class="card" aria-labelledby="sec-unknown" id="unknown-card" hidden>
+        <div class="card-head">
+          <h2 class="heading" id="sec-unknown"></h2>
+          <button type="button" class="btn-outline" id="request-all">입력 요청 보내기</button>
+        </div>
+        <p class="unknown-desc" id="unknown-desc"></p>
+      </section>
+
+      <p class="caption demo-note">시연용 가상 데이터예요</p>
+    </main>
+
+    <div class="cta-bar">
+      <button type="button" class="btn-primary" id="recommend">
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sparkles"/></svg>이 조건으로 추천받기
+      </button>
+    </div>
+  </div>
+</body>
+</html>

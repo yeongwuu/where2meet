@@ -11,7 +11,7 @@
 - 화면 목업: `docs/mockups/V1_시작하기.png` ~ `V5_사람기록.png`
 
 ## 구조
-- `index.html` 홈 (첫 화면), `start.html` ① 시작하기, `meeting.html` ② 모임 만들기. 화면 HTML은 저장소 맨 바깥에 둠
+- `index.html` 홈 (첫 화면), `start.html` ① 시작하기, `meeting.html` ② 모임 만들기, `summary.html` ③ 취향 종합. 화면 HTML은 저장소 맨 바깥에 둠
 - 흐름: 홈 → 모임 만들기 → (프로필 없으면 ①) → ②. ①·② 등 홈이 아닌 화면은 왼쪽 위에 홈 버튼(`.home-link`, house 아이콘)을 둠. 하단 탭은 모임 · 사람 · 내 취향 3칸 그대로
 - `src/css/tokens.css` 디자인 토큰 (색·간격 값은 여기만), `src/css/base.css` 공통 컴포넌트, `src/css/<화면>.css` 화면 전용
 - `src/js/labels.js` 코드값 → 화면 이름, `src/js/common.js` 공통 도구(저장, 데이터 불러오기, 화면 이동 `PAGES`, 안내 문구, 하단 탭), `src/js/<화면>.js` 화면별 동작

@@ -1,0 +1,350 @@
+/* ③ 취향 종합 화면 전용 */
+
+.page-header .header-sub {
+  margin: 2px 0 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.page-header .header-title {
+  margin: 0;
+}
+
+/* 요약 통계 타일: 3열 */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-8);
+  margin: 0;
+}
+
+.stat {
+  padding: var(--space-12);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+}
+
+.stat dt {
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.stat dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.stat dd.is-caution,
+.is-caution {
+  color: var(--caution);
+}
+
+/* 카드 머리: 제목 + 오른쪽 스위치·버튼 */
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
+}
+
+.card-head-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+/* 주의 카드: 반드시 피할 것 */
+.card-caution {
+  border-color: var(--caution);
+}
+
+.card-caution .card-head-title {
+  color: var(--caution);
+}
+
+.card-caution .icon {
+  color: var(--caution);
+}
+
+.locked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--caution);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.avoid-list {
+  margin: 0 0 var(--space-12);
+  padding: 0;
+  list-style: none;
+}
+
+.avoid-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.avoid-list li:first-child {
+  padding-top: 0;
+}
+
+.avoid-list strong {
+  color: var(--caution);
+  font-weight: 700;
+}
+
+.avoid-list .avoid-empty {
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+/* 스위치: "반영" 라벨 + 40×24 */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 44px;
+  margin: -10px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-sub);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  transition: background 0.15s;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s;
+}
+
+.switch[aria-checked="true"] .switch-track {
+  background: var(--primary);
+}
+
+.switch[aria-checked="true"] .switch-track::after {
+  transform: translateX(16px);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-control);
+}
+
+/* 반영을 끈 카드는 내용을 흐리게 */
+.card.is-off > :not(.card-head) {
+  opacity: 0.45;
+}
+
+/* 모임 성격 */
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lines strong,
+.conclusion strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* 취향 막대: 음식명 / 막대 / 좋아함·별로 */
+.food-bars {
+  margin: 0 0 var(--space-12);
+  padding: 0;
+  list-style: none;
+}
+
+.food-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 92px;
+  align-items: center;
+  gap: var(--space-8);
+  padding: 5px 0;
+}
+
+.food-name {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bar {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+}
+
+.food-count {
+  color: var(--text-sub);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--text-sub);
+  font-size: 13px;
+}
+
+/* 비율 막대: 3구간 */
+.ratio-title {
+  margin: 0 0 var(--space-8);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ratio {
+  display: flex;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+
+.seg {
+  flex-basis: 0;
+}
+
+.seg-0 {
+  background: var(--primary-soft);
+}
+
+.seg-1 {
+  background: var(--primary-mid);
+}
+
+.seg-2 {
+  background: var(--primary);
+}
+
+.ratio-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-12);
+  margin: var(--space-8) 0 var(--space-16);
+  color: var(--text-sub);
+  font-size: 12px;
+}
+
+.ratio-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* 연주황 구간은 흰 바탕에서 잘 안 보여서 테두리를 둘러요 */
+.swatch.seg-0 {
+  box-shadow: inset 0 0 0 1px var(--primary-mid);
+}
+
+.conclusion {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* 취향 모름 */
+.btn-outline {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.btn-outline::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.btn-outline[aria-disabled="true"] {
+  color: var(--text-sub);
+  background: var(--bg-subtle);
+}
+
+.btn-outline:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.unknown-desc {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.demo-note {
+  text-align: center;
+}
+
+/* CTA 버튼 아이콘 */
+#recommend .icon {
+  margin-right: var(--space-8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-track,
+  .switch-track::after {
+    transition: none;
+  }
+}

@@ -175,6 +175,7 @@
 | `team` | string | 소속 팀. 이 팀 사람이 처음에 모두 체크돼요 |
 | `place` | `place_*` | 회사 / 신용산역 / 용산역 / 삼각지역 |
 | `walk` | `walk_5` \| `walk_10` \| `walk_15` | 도보 시간 |
+| `apply` | `{character, food, drink}` (boolean) | ③ 스위치로 추천 반영 여부. 없으면 모두 `true`. 끈 항목은 ④ 점수에서 빼요 |
 | `updatedAt` | string | 마지막 수정 시각 |
 
 ---

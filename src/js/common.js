@@ -1,4 +1,5 @@
 // 여러 화면이 같이 쓰는 도구: 저장, 데이터 불러오기, 안내 문구, 화면 이동
+import { BUDGET_MAX } from "./labels.js";
 
 // 브라우저 저장소 키
 export const KEYS = {
@@ -52,7 +53,7 @@ export const PAGES = {
   home: "index.html", // 홈 (첫 화면, 왼쪽 위 홈 버튼)
   start: "start.html", // ① 시작하기 (= 내 취향 탭)
   meeting: "meeting.html", // ② 모임 만들기 (= 모임 탭)
-  summary: null, // ③ 취향 종합
+  summary: "summary.html", // ③ 취향 종합
   result: null, // ④ 추천 결과
   people: null, // ⑤ 사람·기록 (= 사람 탭)
   restaurants: null, // 식당 둘러보기
@@ -83,6 +84,21 @@ export function toast(message) {
   el.classList.add("is-visible");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2600);
+}
+
+// 금액 표시: 5000 → "5천원", 40000 → "4만원"
+export function won(n) {
+  if (n >= 10000) return `${n / 10000}만원`;
+  return n === 0 ? "0원" : `${n / 1000}천원`;
+}
+
+// 1인 예산 [최소, 최대] → "~ 4만원", "2만원 ~ 4만원" 등 (②·③에서 같이 써요)
+export function budgetLabel([min, max]) {
+  if (min === 0 && max === BUDGET_MAX) return "상관없음";
+  if (min === max) return won(min);
+  if (max === BUDGET_MAX) return `${won(min)} 이상`;
+  if (min === 0) return `~ ${won(max)}`;
+  return `${won(min)} ~ ${won(max)}`;
 }
 
 // <svg class="icon"><use …/></svg> 문자열. JS로 그리는 화면에서 써요.
