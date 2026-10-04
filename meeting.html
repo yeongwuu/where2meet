@@ -35,10 +35,12 @@
         <h2 class="heading card-title" id="sec-people">같이 갈 사람</h2>
 
         <div class="field team-field">
-          <label class="field-label" for="team-select">소속 팀</label>
-          <select class="input select" id="team-select">
-            <option value="">팀을 골라 주세요</option>
-          </select>
+          <span class="field-label" id="label-team">소속 팀</span>
+          <button type="button" class="team-picker" id="team-picker" aria-expanded="false" aria-controls="team-options" aria-describedby="label-team">
+            <span id="team-current">팀을 골라 주세요</span>
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-down"/></svg>
+          </button>
+          <div class="team-options" id="team-options" hidden></div>
           <p class="caption team-hint">고른 팀의 팀원이 모두 체크돼요. 다른 팀 사람도 아래에서 더할 수 있어요</p>
         </div>
 

@@ -23,7 +23,8 @@ const form = document.getElementById("meeting-form");
 const teamsEl = document.getElementById("teams");
 const guestsEl = document.getElementById("guests");
 const searchInput = document.getElementById("people-search");
-const teamSelect = document.getElementById("team-select");
+const teamPicker = document.getElementById("team-picker");
+const teamOptions = document.getElementById("team-options");
 
 let members = []; // 나를 포함한 회원
 let guests = [];
@@ -78,25 +79,43 @@ function teamNames() {
   return info.team ? [info.team, ...all.filter((t) => t !== info.team)] : all;
 }
 
-function renderTeamSelect() {
-  // "Assurance 3팀" → 본부 "Assurance"로 묶어요
+// 소속 팀 고르기: 펼치면 본부별 팀 칩이 나와요 ("Assurance 3팀" → 본부 "Assurance" 아래 "3팀")
+function renderTeamPicker() {
   const byDivision = {};
   [...new Set(members.slice(1).map((m) => m.team))].forEach((team) => {
     (byDivision[team.split(" ")[0]] ??= []).push(team);
   });
-  teamSelect.insertAdjacentHTML(
-    "beforeend",
-    Object.entries(byDivision)
-      .map(([division, teams]) => `<optgroup label="${division}">${teams.map((t) => `<option>${t}</option>`).join("")}</optgroup>`)
-      .join(""),
-  );
+  teamOptions.innerHTML = Object.entries(byDivision)
+    .map(
+      ([division, teams]) => `
+        <p class="division" id="division-${division}">${division}</p>
+        <div class="chips chips-sm" role="group" aria-labelledby="division-${division}">
+          ${teams
+            .map((t) => `<button type="button" class="chip" data-team-option="${t}" aria-pressed="false" aria-label="${t}">${t.slice(division.length + 1)}</button>`)
+            .join("")}
+        </div>`,
+    )
+    .join("");
+}
+
+function syncTeamPicker() {
+  document.getElementById("team-current").textContent = info.team || "팀을 골라 주세요";
+  teamPicker.classList.toggle("is-empty", !info.team);
+  teamOptions.querySelectorAll("[data-team-option]").forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip.dataset.teamOption === info.team));
+  });
+}
+
+function openTeamPicker(open) {
+  teamPicker.setAttribute("aria-expanded", String(open));
+  teamOptions.hidden = !open;
 }
 
 // 소속 팀 바꾸기: 나를 그 팀에 넣고, 그 팀 사람을 모두 고른 상태로 (비회원 선택은 그대로)
 function setTeam(team) {
   info.team = team;
   self().team = team || null;
-  teamSelect.value = team;
+  syncTeamPicker();
   members.slice(1).forEach((m) => selected.delete(m.id));
   members.filter((m) => team && m.team === team).forEach((m) => selected.add(m.id));
   selected.add(SELF_ID);
@@ -463,7 +482,7 @@ async function init() {
   const draft = load(KEYS.meeting);
 
   // 기본: 내 프로필의 팀 전체를 고른 상태. 팀을 모르면 직접 고르게 비워 둬요
-  renderTeamSelect();
+  renderTeamPicker();
   setTeam(profile.team ?? "");
   renderPeople();
   onChange({ persist: false });
@@ -474,10 +493,25 @@ async function init() {
   teamsEl.addEventListener("click", onPeopleClick);
   guestsEl.addEventListener("click", onPeopleClick);
   searchInput.addEventListener("input", applySearch);
-  teamSelect.addEventListener("change", () => {
-    setTeam(teamSelect.value);
+  teamPicker.addEventListener("click", () => openTeamPicker(teamOptions.hidden));
+  teamOptions.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-team-option]");
+    if (!chip) return;
+    setTeam(chip.dataset.teamOption);
+    openTeamPicker(false);
+    teamPicker.focus();
     renderPeople();
     onChange();
+  });
+  // 바깥을 누르거나 Esc를 누르면 접어요
+  document.addEventListener("click", (event) => {
+    if (!teamOptions.hidden && !event.target.closest(".team-field")) openTeamPicker(false);
+  });
+  teamOptions.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      openTeamPicker(false);
+      teamPicker.focus();
+    }
   });
   document.getElementById("add-guest").addEventListener("click", () => goTo("people"));
 
