@@ -1,1 +1,5 @@
-[]
+[
+  {"id": "g01", "title": "재무본부 상무님", "relation": "임원", "allergies": [], "diet": [], "likes": [], "dislikes": [], "needs": [], "memo": "", "history": []},
+  {"id": "g02", "title": "A사 재무팀장님", "relation": "거래처", "allergies": [], "diet": [], "likes": [], "dislikes": [], "needs": [], "memo": "", "history": []},
+  {"id": "g03", "title": "감사본부 파트너님", "relation": "임원", "allergies": [], "diet": [], "likes": [], "dislikes": [], "needs": [], "memo": "", "history": []}
+]

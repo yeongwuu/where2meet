@@ -1,9 +1,9 @@
 // ① 시작하기: 기본 정보 + 내 취향 입력, 체험 계정으로 바로 시작
 import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE } from "./labels.js";
+import { KEYS, load, save, loadData, goTo, toast } from "./common.js";
 
 const DEMO_INVITE_CODE = "DEMO-2026";
 const TRIAL_MEMBER_ID = "p01"; // 체험 계정: 가상 동료 '하늘'
-const STORAGE_KEY = "w2m.profile";
 
 // 칩 그룹별 선택지. "해당 없어요"는 알레르기·식이 제한에만 있어요.
 const OPTIONS = {
@@ -167,50 +167,17 @@ function fillForm(profile, inviteCode = "") {
   setSelected("mood", profile.mood ? [profile.mood] : DEFAULTS.mood);
 }
 
-function saveProfile(profile) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-  } catch {
-    // 시크릿 창 등에서 저장이 막혀도 화면 진행은 계속해요
-  }
-}
-
-function loadSavedProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY));
-  } catch {
-    return null;
-  }
-}
-
 async function loadTrialProfile() {
-  const res = await fetch("docs/data/members.json");
-  if (!res.ok) throw new Error(`members.json ${res.status}`);
-  const members = await res.json();
+  const members = await loadData("members");
   return members.find((m) => m.id === TRIAL_MEMBER_ID);
-}
-
-// ---------- 화면 이동 ----------
-
-let toastTimer;
-function toast(message) {
-  const el = document.getElementById("toast");
-  el.textContent = message;
-  el.classList.add("is-visible");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("is-visible"), 2600);
-}
-
-// ② 모임 만들기 화면을 만들면 여기서 이동해요: location.href = "meeting.html";
-function goToMeeting() {
-  toast("저장했어요. 모임 만들기 화면은 준비 중이에요");
 }
 
 // ---------- 시작 ----------
 
+const savedProfile = load(KEYS.profile);
 renderChips();
-fillForm(loadSavedProfile() ?? {});
-if (!loadSavedProfile()) {
+fillForm(savedProfile ?? {}, savedProfile?.inviteCode);
+if (!savedProfile) {
   // 처음 온 사람은 못 먹는 것을 직접 고르게 비워 둬요
   setSelected("allergies", []);
   setSelected("diet", []);
@@ -224,16 +191,16 @@ form.nickname.addEventListener("input", () => clearError("nickname-error", form.
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!validate()) return;
-  saveProfile(readForm());
-  goToMeeting();
+  save(KEYS.profile, { ...savedProfile, ...readForm(), inviteCode: form.inviteCode.value.trim() });
+  goTo("meeting");
 });
 
 document.getElementById("trial-start").addEventListener("click", async () => {
   try {
     const trial = await loadTrialProfile();
-    fillForm({ ...trial, rank: "rank_associate" }, DEMO_INVITE_CODE);
-    saveProfile({ ...readForm(), id: trial.id });
-    goToMeeting();
+    fillForm(trial, DEMO_INVITE_CODE);
+    save(KEYS.profile, { ...readForm(), id: trial.id, team: trial.team, inviteCode: DEMO_INVITE_CODE });
+    goTo("meeting");
   } catch {
     toast("체험 계정을 불러오지 못했어요. 잠시 후 다시 눌러 주세요");
   }

@@ -9,6 +9,11 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* hidden 속성은 display 지정보다 항상 우선 */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--border);
@@ -337,4 +342,226 @@ input {
   .toast {
     transition: none;
   }
+}
+
+/* 화면 헤더 (②~⑤) */
+.page-header {
+  padding: var(--space-16) var(--gutter) var(--space-12);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-header .eyebrow {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.header-title {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* 하단 탭이 있는 화면: CTA 바를 탭 바로 위에 붙여요 */
+.page.has-tabs {
+  padding-bottom: 180px;
+}
+
+.page.has-tabs .cta-bar {
+  bottom: 60px;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+}
+
+.cta-summary {
+  margin: 0 0 var(--space-8);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cta-summary strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.cta-summary .is-caution {
+  color: var(--caution);
+}
+
+.btn-primary:disabled {
+  background: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+/* 하단 탭 */
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: var(--page-max);
+  height: calc(60px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-sub);
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tab .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.tab[aria-current="page"] {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -4px;
+}
+
+/* 체크박스 */
+.checkbox {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* 상태 배지 추가 색 */
+.badge-subtle {
+  background: var(--bg-subtle);
+  color: var(--text-sub);
+}
+
+.badge-check {
+  gap: 2px;
+  background: var(--bg-subtle);
+  color: var(--check);
+}
+
+.badge-caution {
+  gap: 2px;
+  background: var(--bg-subtle);
+  color: var(--caution);
+}
+
+.badge .icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.25;
+}
+
+/* 텍스트 링크 버튼 */
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.link-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 펼치기 버튼 */
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.btn-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.btn-toggle .icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.15s;
+}
+
+.btn-toggle[aria-expanded="true"] .icon {
+  transform: rotate(180deg);
+}
+
+.btn-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 한 줄 카드 (이어서 하기 등) */
+.row-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row-card strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.row-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

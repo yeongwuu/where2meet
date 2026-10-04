@@ -33,9 +33,10 @@ where2meet/
 │   ├── data_spec.md   # 데이터·추천 로직
 │   ├── data/          # 샘플 데이터 (JSON)
 │   └── mockups/       # 화면 목업 V1~V5
-├── index.html         # 첫 화면
+├── index.html         # ① 시작하기 (첫 화면)
+├── meeting.html       # ② 모임 만들기
 ├── src/               # JS·CSS 소스
-├── assets/            # 이미지 등 정적 파일
+├── assets/            # 아이콘(icons.svg) 등 정적 파일
 ├── CLAUDE.md          # AI 도구용 프로젝트 안내
 └── README.md
 ```
@@ -55,7 +56,7 @@ python3 -m http.server 5173
 | 화면 | 파일 | 상태 |
 |---|---|---|
 | ① 시작하기 | `index.html` | 완료 |
-| ② 모임 만들기 | | 예정 |
+| ② 모임 만들기 | `meeting.html` | 완료 |
 | ③ 취향 종합 | | 예정 |
 | ④ 추천 결과 | | 예정 |
 | ⑤ 사람·기록 | | 예정 |

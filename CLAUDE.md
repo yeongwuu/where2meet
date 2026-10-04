@@ -11,9 +11,11 @@
 - 화면 목업: `docs/mockups/V1_시작하기.png` ~ `V5_사람기록.png`
 
 ## 구조
-- `index.html` 첫 화면 (저장소 맨 바깥)
+- `index.html` ① 시작하기 (첫 화면), `meeting.html` ② 모임 만들기. 화면 HTML은 저장소 맨 바깥에 둠
 - `src/css/tokens.css` 디자인 토큰 (색·간격 값은 여기만), `src/css/base.css` 공통 컴포넌트, `src/css/<화면>.css` 화면 전용
-- `src/js/labels.js` 코드값 → 화면 이름, `src/js/<화면>.js` 화면별 동작
+- `src/js/labels.js` 코드값 → 화면 이름, `src/js/common.js` 공통 도구(저장, 데이터 불러오기, 화면 이동 `PAGES`, 안내 문구, 하단 탭), `src/js/<화면>.js` 화면별 동작
+- 새 화면을 만들면 `common.js`의 `PAGES`에 파일 이름을 채울 것 (비어 있으면 "준비 중" 안내가 뜸)
+- 아이콘은 `assets/icons.svg`의 Lucide 심볼을 `<use href="assets/icons.svg#i-이름">`으로 씀. 새 아이콘은 이 파일에 추가
 - `assets/` 이미지 등 정적 파일 (`public/` 폴더는 만들지 말 것: Vercel이 그 폴더만 배포해서 404가 남)
 
 ## 작업 방식

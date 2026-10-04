@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>어디서 모여? · 모임 만들기</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="src/css/tokens.css">
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/meeting.css">
+  <script type="module" src="src/js/meeting.js"></script>
+</head>
+<body>
+  <div class="page has-tabs">
+    <!-- ② 모임 만들기 -->
+    <header class="page-header">
+      <p class="eyebrow" id="greeting">안녕하세요</p>
+      <h1 class="header-title">모임 만들기</h1>
+    </header>
+
+    <form class="page-body" id="meeting-form" novalidate>
+      <!-- 이어서 하기: 작성 중인 모임이 있을 때만 보여요 -->
+      <button type="button" class="row-card" id="resume" hidden>
+        <span><strong>이어서 하기</strong> · <span id="resume-label"></span></span>
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-right"/></svg>
+      </button>
+
+      <!-- 같이 갈 사람 -->
+      <section class="card" aria-labelledby="sec-people">
+        <h2 class="heading card-title" id="sec-people">같이 갈 사람</h2>
+
+        <label class="sr-only" for="people-search">이름·팀 검색</label>
+        <div class="search">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-search"/></svg>
+          <input class="search-input" id="people-search" type="search" placeholder="이름·팀 검색" autocomplete="off">
+        </div>
+
+        <div id="teams"></div>
+        <p class="search-empty caption" id="search-empty" hidden>찾는 사람이 없어요</p>
+
+        <div class="guest-head">
+          <h3 class="guest-title">비회원 · 내 메모</h3>
+          <button type="button" class="link-btn" id="add-guest">
+            <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-plus"/></svg>비회원 추가
+          </button>
+        </div>
+        <ul class="person-list" id="guests"></ul>
+      </section>
+
+      <!-- 모임 정보 -->
+      <section class="card" aria-labelledby="sec-info">
+        <h2 class="heading card-title" id="sec-info">모임 정보</h2>
+
+        <div class="field">
+          <span class="field-label" id="label-purpose">목적</span>
+          <div class="chips" role="group" aria-labelledby="label-purpose" data-group="purpose"></div>
+        </div>
+
+        <div class="field">
+          <div class="budget-head">
+            <span class="field-label" id="label-budget">1인당 예산</span>
+            <output class="budget-value" id="budget-value" for="budget-min budget-max"></output>
+          </div>
+          <div class="range" id="budget-range">
+            <div class="range-track"><div class="range-fill" id="budget-fill"></div></div>
+            <input type="range" id="budget-min" min="0" max="100000" step="5000" aria-label="최소 예산">
+            <input type="range" id="budget-max" min="0" max="100000" step="5000" aria-label="최대 예산">
+          </div>
+          <div class="range-scale caption" aria-hidden="true"><span>0원</span><span>5만원</span><span>10만원 이상</span></div>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-budget" id="budget-presets"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-when">언제</span>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-when">
+            <span class="chip-set" data-group="day"></span>
+            <span class="chip-set" data-group="meal"></span>
+          </div>
+          <input class="input date-input" id="date" type="date" aria-label="날짜" hidden>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-where">어디서</span>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-where">
+            <span class="chip-set" data-group="place"></span>
+            <span class="chip-set" data-group="walk"></span>
+          </div>
+          <p class="caption info-note">음식·분위기는 묻지 않아요. 같이 갈 사람들의 취향에서 자동으로 계산해요</p>
+        </div>
+      </section>
+    </form>
+
+    <div class="cta-bar">
+      <p class="cta-summary" id="summary" aria-live="polite"></p>
+      <button type="submit" form="meeting-form" class="btn-primary" id="submit">취향 종합 보기</button>
+    </div>
+
+    <nav class="tab-bar" aria-label="메뉴">
+      <a class="tab" data-tab="meeting" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg>모임
+      </a>
+      <a class="tab" data-tab="people" href="#">
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-book-open"/></svg>사람
+      </a>
+      <a class="tab" data-tab="start">
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-user"/></svg>내 취향
+      </a>
+    </nav>
+  </div>
+</body>
+</html>
