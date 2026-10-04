@@ -8,6 +8,22 @@ export const KEYS = {
   requests: "w2m.requests", // ② 취향 입력을 부탁한 사람 { id: 보낸 시각 }
 };
 
+// 체험 계정: 가상 동료 '하늘'(members.json p01)
+export const TRIAL_ID = "p01";
+
+export function isTrial(profile) {
+  return profile?.id === TRIAL_ID;
+}
+
+// 체험 계정에서 나가기: 하늘 프로필과 하늘로 작성하던 모임·요청 기록을 지워요 (직접 추가한 비회원은 남겨요)
+export function leaveTrial() {
+  try {
+    [KEYS.profile, KEYS.meeting, KEYS.requests].forEach((key) => localStorage.removeItem(key));
+  } catch {
+    // 저장소를 못 쓰는 환경이면 지울 것도 없어요
+  }
+}
+
 export function load(key) {
   try {
     return JSON.parse(localStorage.getItem(key));

@@ -346,6 +346,25 @@ input {
   box-shadow: var(--shadow-cta);
 }
 
+/* 안내 상자 (체험 계정 안내 등) */
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-12);
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-box);
+  background: var(--primary-soft);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.notice p {
+  margin: var(--space-4) 0;
+}
+
 /* 확인 창 */
 .dialog {
   width: calc(min(100vw, var(--page-max)) - 2 * var(--gutter));

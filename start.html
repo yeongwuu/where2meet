@@ -34,6 +34,12 @@
     </header>
 
     <form class="page-body" id="profile-form" novalidate>
+      <!-- 체험 계정으로 보는 중일 때만 -->
+      <div class="notice" id="trial-notice" hidden>
+        <p>지금은 체험 계정 '하늘' 님 프로필이에요. 여기서 고치면 하늘 님 프로필이 바뀌어요.</p>
+        <button type="button" class="link-btn" id="trial-leave">내 프로필로 새로 입력하기</button>
+      </div>
+
       <!-- 1 기본 정보 -->
       <section class="card" aria-labelledby="sec-basic">
         <div class="card-title">

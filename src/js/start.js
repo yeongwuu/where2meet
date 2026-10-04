@@ -1,9 +1,8 @@
 // ① 시작하기: 기본 정보 + 내 취향 입력, 체험 계정으로 바로 시작
 import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE } from "./labels.js";
-import { KEYS, load, save, loadData, goTo, toast } from "./common.js";
+import { KEYS, TRIAL_ID, isTrial, leaveTrial, load, save, loadData, goTo, toast } from "./common.js";
 
 const INVITE_CODE = "Fit-stop"; // 사내초대코드. 처음 온 사람에게는 미리 채워 둬요
-const TRIAL_MEMBER_ID = "p01"; // 체험 계정: 가상 동료 '하늘'
 
 // 칩 그룹별 선택지. "해당 없어요"는 알레르기·식이 제한에만 있어요.
 const OPTIONS = {
@@ -169,12 +168,12 @@ function fillForm(profile, inviteCode = "") {
 
 async function loadTrialProfile() {
   const members = await loadData("members");
-  return members.find((m) => m.id === TRIAL_MEMBER_ID);
+  return members.find((m) => m.id === TRIAL_ID);
 }
 
 // ---------- 시작 ----------
 
-const savedProfile = load(KEYS.profile);
+let savedProfile = load(KEYS.profile);
 renderChips();
 fillForm(savedProfile ?? {}, INVITE_CODE);
 if (!savedProfile) {
@@ -182,6 +181,20 @@ if (!savedProfile) {
   setSelected("allergies", []);
   setSelected("diet", []);
 }
+
+// 체험 계정으로 보는 중이면 안내하고, 내 프로필로 새로 입력할 수 있게 해요
+const trialNotice = document.getElementById("trial-notice");
+trialNotice.hidden = !isTrial(savedProfile);
+document.getElementById("trial-leave").addEventListener("click", () => {
+  leaveTrial();
+  savedProfile = null;
+  fillForm({}, INVITE_CODE);
+  setSelected("allergies", []);
+  setSelected("diet", []);
+  trialNotice.hidden = true;
+  form.nickname.focus();
+  toast("체험 계정에서 나왔어요. 내 프로필을 입력해 주세요");
+});
 
 form.addEventListener("click", onChipClick);
 

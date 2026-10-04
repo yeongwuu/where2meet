@@ -1,6 +1,6 @@
 // 홈: 모임 만들기(프로필이 없으면 ① 먼저) + 다른 메뉴
 import { PURPOSE } from "./labels.js";
-import { KEYS, load, loadData, goTo, setupTabBar } from "./common.js";
+import { KEYS, isTrial, leaveTrial, load, loadData, goTo, setupTabBar } from "./common.js";
 
 const profile = load(KEYS.profile);
 const draft = load(KEYS.meeting);
@@ -43,7 +43,18 @@ function startMeeting() {
   goTo(profile ? "meeting" : "start");
 }
 
+// 체험 계정이면 내 프로필로 바꿀 수 있게 안내해요
+function renderTrialBanner() {
+  if (!isTrial(profile)) return;
+  document.getElementById("trial-banner").hidden = false;
+  document.getElementById("trial-leave").addEventListener("click", () => {
+    leaveTrial();
+    goTo("start");
+  });
+}
+
 renderGreeting();
+renderTrialBanner();
 renderMeetingCard();
 renderResume();
 renderCounts();
