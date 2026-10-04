@@ -406,11 +406,12 @@ function currentMeeting() {
   };
 }
 
-function onChange() {
+// 화면을 다시 그리고, 사용자가 바꾼 경우에만 "작성 중"으로 저장해요
+function onChange({ persist = true } = {}) {
   syncChips();
   syncBudget();
   renderSummary();
-  save(KEYS.meeting, currentMeeting());
+  if (persist) save(KEYS.meeting, currentMeeting());
 }
 
 function applyMeeting(meeting) {
@@ -465,7 +466,7 @@ async function init() {
   renderTeamSelect();
   setTeam(profile.team ?? "");
   renderPeople();
-  onChange();
+  onChange({ persist: false });
   setupResume(draft);
 
   teamsEl.addEventListener("change", onPeopleChange);

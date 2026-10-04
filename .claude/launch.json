@@ -4,7 +4,9 @@
     {
       "name": "where2meet",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "5173"],
+      "runtimeArgs": [
+        "scripts/serve.py"
+      ],
       "port": 5173
     }
   ]

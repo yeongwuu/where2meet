@@ -31,11 +31,15 @@ export async function loadData(name) {
 
 // 화면 파일. 아직 없는 화면은 null이고, 만들면 파일 이름을 채워요.
 export const PAGES = {
-  start: "index.html", // ① 시작하기 (= 내 취향 탭)
+  home: "index.html", // 홈 (첫 화면, 왼쪽 위 홈 버튼)
+  start: "start.html", // ① 시작하기 (= 내 취향 탭)
   meeting: "meeting.html", // ② 모임 만들기 (= 모임 탭)
   summary: null, // ③ 취향 종합
   result: null, // ④ 추천 결과
   people: null, // ⑤ 사람·기록 (= 사람 탭)
+  restaurants: null, // 식당 둘러보기
+  review: null, // 후기 남기기
+  teamTaste: null, // 우리 팀 취향
 };
 
 export function goTo(page) {

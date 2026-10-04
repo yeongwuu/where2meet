@@ -81,11 +81,12 @@ input {
   white-space: nowrap;
 }
 
-/* 아이콘 (Lucide 선 아이콘) */
+/* 아이콘 (Lucide 선 아이콘): 주황 테두리만, 속은 비움 */
 .icon {
   width: 18px;
   height: 18px;
   flex: none;
+  color: var(--primary);
   fill: none;
   stroke: currentColor;
   stroke-width: 1.75;
@@ -96,6 +97,37 @@ input {
 .icon-sm {
   width: 14px;
   height: 14px;
+}
+
+/* 예외: 색 자체가 뜻인 곳(✓ 초록 · ⚠ 갈색 · 안내 문구)과 주황 버튼 위에서는 글자색을 따라가요 */
+.badge .icon,
+.note .icon,
+.btn-primary .icon {
+  color: inherit;
+}
+
+/* 왼쪽 위 홈 버튼 */
+.home-link {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -6px 0 -6px -10px;
+  border-radius: var(--radius-control);
+}
+
+.home-link .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.home-link:hover {
+  background: var(--primary-soft);
+}
+
+.home-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 /* 카드 */
@@ -351,6 +383,13 @@ input {
   border-bottom: 1px solid var(--border);
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 32px;
+}
+
 .page-header .eyebrow {
   margin: 0;
   color: var(--text-sub);
@@ -431,9 +470,22 @@ input {
   height: 22px;
 }
 
+/* 아이콘은 늘 주황 선. 지금 화면 탭은 연주황 바탕 + 주황 굵은 글씨로 구분 */
+.tab-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+}
+
 .tab[aria-current="page"] {
   color: var(--primary);
   font-weight: 700;
+}
+
+.tab[aria-current="page"] .tab-icon {
+  background: var(--primary-soft);
 }
 
 .tab:focus-visible {

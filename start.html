@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>어디서 모여? · 시작하기</title>
+  <meta name="description" content="함께 가는 사람들 취향까지 맞춘 회식 장소, 1분 안에">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="src/css/tokens.css">
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/start.css">
+  <script type="module" src="src/js/start.js"></script>
+</head>
+<body>
+  <div class="page">
+    <!-- ① 시작하기: 앱 소개 + 체험 계정 -->
+    <header class="start-hero">
+      <div class="header-row">
+        <a class="home-link" href="index.html" aria-label="홈">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-house"/></svg>
+        </a>
+        <span class="badge badge-soft">삼일맛집DB</span>
+      </div>
+      <h1 class="display">어디서 모여?</h1>
+      <p class="start-lead">함께 가는 사람들 취향까지 맞춘 회식 장소, 1분 안에</p>
+
+      <button type="button" class="trial-card" id="trial-start">
+        <span class="trial-text">
+          <span class="trial-title">체험 계정으로 바로 시작</span>
+          <span class="trial-sub">가상 동료 '하늘' 님 프로필로 둘러보기</span>
+        </span>
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-right"/></svg>
+      </button>
+    </header>
+
+    <form class="page-body" id="profile-form" novalidate>
+      <!-- 1 기본 정보 -->
+      <section class="card" aria-labelledby="sec-basic">
+        <div class="card-title">
+          <span class="step-num" aria-hidden="true">1</span>
+          <h2 class="heading" id="sec-basic">기본 정보</h2>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="invite-code">사내초대코드</label>
+          <input class="input" id="invite-code" name="inviteCode" autocomplete="off" autocapitalize="characters" placeholder="예: DEMO-2026" aria-describedby="invite-code-error">
+          <p class="field-error" id="invite-code-error" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="nickname">닉네임</label>
+          <input class="input" id="nickname" name="nickname" autocomplete="nickname" maxlength="12" placeholder="같이 갈 사람들에게 보이는 이름" aria-describedby="nickname-error">
+          <p class="field-error" id="nickname-error" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-rank">직급</span>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-rank" data-group="rank" data-mode="single"></div>
+          <p class="caption start-help">직급은 모임에 상사·임원이 있는지 판단할 때만 쓰여요</p>
+        </div>
+      </section>
+
+      <!-- 2 못 먹는 것 (필수) -->
+      <section class="card" aria-labelledby="sec-avoid">
+        <div class="card-title">
+          <span class="step-num" aria-hidden="true">2</span>
+          <h2 class="heading" id="sec-avoid">못 먹는 것</h2>
+          <span class="badge badge-soft">필수</span>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-allergy">알레르기</span>
+          <div class="chips" role="group" aria-labelledby="label-allergy" data-group="allergies" data-mode="multi-none"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-diet">식이 제한</span>
+          <div class="chips" role="group" aria-labelledby="label-diet" data-group="diet" data-mode="multi-none"></div>
+        </div>
+
+        <p class="field-error" id="avoid-error" role="alert"></p>
+        <p class="note note-caution">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-lock"/></svg>
+          <span>추천에서 반드시 지키는 조건이에요. 다른 사람에게는 이름 없이 합산으로만 보여요</span>
+        </p>
+      </section>
+
+      <!-- 3 음식 취향 -->
+      <section class="card" aria-labelledby="sec-food">
+        <div class="card-title">
+          <span class="step-num" aria-hidden="true">3</span>
+          <h2 class="heading" id="sec-food">음식 취향</h2>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-likes">좋아하는 음식<span class="hint">여러 개</span></span>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-likes" data-group="likes" data-mode="multi"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-dislikes">별로인 음식<span class="hint">여러 개</span></span>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-dislikes" data-group="dislikes" data-mode="multi"></div>
+        </div>
+      </section>
+
+      <!-- 4 회식 스타일 -->
+      <section class="card" aria-labelledby="sec-style">
+        <div class="card-title">
+          <span class="step-num" aria-hidden="true">4</span>
+          <h2 class="heading" id="sec-style">회식 스타일</h2>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-drink">술</span>
+          <div class="chips" role="group" aria-labelledby="label-drink" data-group="drink" data-mode="single"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="label-mood">분위기</span>
+          <div class="chips" role="group" aria-labelledby="label-mood" data-group="mood" data-mode="single"></div>
+        </div>
+      </section>
+
+      <p class="caption start-footnote">시연용 가상 데이터예요. 실제 식당 정보와 다를 수 있어요</p>
+    </form>
+
+    <div class="cta-bar">
+      <button type="submit" form="profile-form" class="btn-primary">저장하고 모임 만들기</button>
+    </div>
+  </div>
+
+</body>
+</html>

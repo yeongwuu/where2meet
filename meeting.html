@@ -14,7 +14,12 @@
   <div class="page has-tabs">
     <!-- ② 모임 만들기 -->
     <header class="page-header">
-      <p class="eyebrow" id="greeting">안녕하세요</p>
+      <div class="header-row">
+        <a class="home-link" href="index.html" aria-label="홈">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-house"/></svg>
+        </a>
+        <p class="eyebrow" id="greeting">안녕하세요</p>
+      </div>
       <h1 class="header-title">모임 만들기</h1>
     </header>
 
@@ -105,13 +110,13 @@
 
     <nav class="tab-bar" aria-label="메뉴">
       <a class="tab" data-tab="meeting" aria-current="page">
-        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg>모임
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg></span>모임
       </a>
       <a class="tab" data-tab="people" href="#">
-        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-book-open"/></svg>사람
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-book-open"/></svg></span>사람
       </a>
       <a class="tab" data-tab="start">
-        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-user"/></svg>내 취향
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-user"/></svg></span>내 취향
       </a>
     </nav>
   </div>

@@ -1,0 +1,107 @@
+/* 홈 화면 전용 */
+.page.home {
+  padding-bottom: 96px; /* 하단 탭만 있고 CTA 바는 없어요 */
+}
+
+.home-hero {
+  padding: var(--space-24) var(--gutter) var(--space-20);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.home-hero .display {
+  margin-top: var(--space-12);
+}
+
+.home-greeting {
+  margin: var(--space-8) 0 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.home-greeting strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* 모임 만들기 강조 카드 */
+.card-accent {
+  border-color: var(--primary);
+}
+
+.accent-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-bottom: var(--space-16);
+}
+
+/* 메뉴 아이콘: 연주황 바탕 위 주황 선 아이콘 */
+.menu-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: var(--radius-card);
+  background: var(--primary-soft);
+}
+
+.menu-icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.menu-sub {
+  display: block;
+  margin: 2px 0 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* 메뉴 목록 */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.menu-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: 14px var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-card:hover {
+  border-color: var(--primary-mid);
+}
+
+.menu-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.menu-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu-title {
+  display: block;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home-footnote {
+  text-align: center;
+  padding-top: var(--space-4);
+}

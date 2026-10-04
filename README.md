@@ -33,10 +33,12 @@ where2meet/
 │   ├── data_spec.md   # 데이터·추천 로직
 │   ├── data/          # 샘플 데이터 (JSON)
 │   └── mockups/       # 화면 목업 V1~V5
-├── index.html         # ① 시작하기 (첫 화면)
+├── index.html         # 홈 (첫 화면)
+├── start.html         # ① 시작하기 (내 프로필)
 ├── meeting.html       # ② 모임 만들기
 ├── src/               # JS·CSS 소스
 ├── assets/            # 아이콘(icons.svg) 등 정적 파일
+├── scripts/serve.py   # 로컬 미리보기 서버 (캐시 끔)
 ├── CLAUDE.md          # AI 도구용 프로젝트 안내
 └── README.md
 ```
@@ -47,7 +49,7 @@ where2meet/
 내 컴퓨터에서 보기: 저장소 폴더에서 아래 명령을 실행하고 http://localhost:5173 을 열어요. (`index.html`을 더블클릭하면 데이터를 못 읽어요)
 
 ```bash
-python3 -m http.server 5173
+python3 scripts/serve.py
 ```
 
 배포: `main`에 push하면 Vercel이 자동으로 다시 배포해요. 1분쯤 뒤 https://where2meet-pit-stop.vercel.app 에 반영돼요.
@@ -55,7 +57,8 @@ python3 -m http.server 5173
 ## 화면 진행 상황
 | 화면 | 파일 | 상태 |
 |---|---|---|
-| ① 시작하기 | `index.html` | 완료 |
+| 홈 | `index.html` | 완료 (식당 둘러보기·후기 남기기·우리 팀 취향 메뉴는 준비 중) |
+| ① 시작하기 | `start.html` | 완료 |
 | ② 모임 만들기 | `meeting.html` | 완료 |
 | ③ 취향 종합 | | 예정 |
 | ④ 추천 결과 | | 예정 |
