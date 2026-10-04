@@ -4,6 +4,7 @@
 export const KEYS = {
   profile: "w2m.profile", // ① 내 프로필
   meeting: "w2m.meeting", // ② 작성 중인 모임
+  guests: "w2m.guests", // ② 내가 추가한 비회원
 };
 
 export function load(key) {

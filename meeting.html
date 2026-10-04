@@ -40,7 +40,7 @@
             <span id="team-current">팀을 골라 주세요</span>
             <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-down"/></svg>
           </button>
-          <div class="team-options" id="team-options" hidden></div>
+          <div class="picker-panel" id="team-options" hidden></div>
           <p class="caption team-hint">고른 팀의 팀원이 모두 체크돼요. 다른 팀 사람도 아래에서 더할 수 있어요</p>
         </div>
 
@@ -55,15 +55,44 @@
 
         <div class="guest-head">
           <h3 class="guest-title">비회원 · 내 메모</h3>
-          <button type="button" class="link-btn" id="add-guest">
+          <button type="button" class="link-btn" id="add-guest" aria-expanded="false" aria-controls="guest-form">
             <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-plus"/></svg>비회원 추가
           </button>
+        </div>
+
+        <!-- 비회원 추가: 누르면 펼쳐져요 -->
+        <div class="picker-panel guest-form" id="guest-form" hidden>
+          <div class="field">
+            <label class="field-label" for="guest-title">호칭</label>
+            <input class="input" id="guest-title" maxlength="20" autocomplete="off" placeholder="예: B사 재무이사님, 인사팀 차장님" aria-describedby="guest-title-error">
+            <p class="field-error" id="guest-title-error" role="alert"></p>
+          </div>
+          <div class="field">
+            <label class="field-label" for="guest-org">회사·부서<span class="hint">선택</span></label>
+            <input class="input" id="guest-org" maxlength="20" autocomplete="off" placeholder="예: B사, 인사팀">
+          </div>
+          <div class="field">
+            <span class="field-label" id="label-relation">관계</span>
+            <div class="chips chips-sm" role="group" aria-labelledby="label-relation" id="guest-relation"></div>
+          </div>
+          <div class="field">
+            <span class="field-label" id="label-guest-avoid">못 먹는 것<span class="hint">아는 것만</span></span>
+            <div class="chips chips-sm" role="group" aria-labelledby="label-guest-avoid" id="guest-avoid"></div>
+          </div>
+          <p class="note">
+            <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-lock"/></svg>
+            <span>실명 대신 호칭으로 적어 주세요. 이 정보는 나만 볼 수 있어요</span>
+          </p>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="guest-cancel">취소</button>
+            <button type="button" class="btn-primary btn-sm" id="guest-save">추가하고 고르기</button>
+          </div>
         </div>
 
         <label class="sr-only" for="guest-search">비회원 검색</label>
         <div class="search guest-search">
           <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-search"/></svg>
-          <input class="search-input" id="guest-search" type="search" placeholder="호칭·회사·부서 검색 (예: A사, CFO, 인사팀)" autocomplete="off">
+          <input class="search-input" id="guest-search" type="search" placeholder="호칭·회사·부서 검색" autocomplete="off">
         </div>
         <ul class="person-list" id="guests"></ul>
         <p class="search-empty caption" id="guest-hint" aria-live="polite"></p>
@@ -96,17 +125,19 @@
           <span class="field-label" id="label-when">언제</span>
           <div class="chips chips-sm" role="group" aria-labelledby="label-when">
             <span class="chip-set" data-group="day"></span>
-            <span class="chip-set" data-group="meal"></span>
+            <button type="button" class="chip chip-picker" id="time-picker" aria-expanded="false" aria-controls="time-options">
+              <span id="time-current">시간 선택</span>
+              <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-chevron-down"/></svg>
+            </button>
           </div>
           <input class="input date-input" id="date" type="date" aria-label="날짜" hidden>
+          <div class="picker-panel" id="time-options" hidden></div>
         </div>
 
         <div class="field">
           <span class="field-label" id="label-where">어디서</span>
-          <div class="chips chips-sm" role="group" aria-labelledby="label-where">
-            <span class="chip-set" data-group="place"></span>
-            <span class="chip-set" data-group="walk"></span>
-          </div>
+          <div class="chips chips-sm" role="group" aria-labelledby="label-where" data-group="place"></div>
+          <div class="chips chips-sm walk-row" role="group" aria-label="도보 시간" data-group="walk"></div>
           <p class="caption info-note">음식·분위기는 묻지 않아요. 같이 갈 사람들의 취향에서 자동으로 계산해요</p>
         </div>
       </section>

@@ -68,16 +68,17 @@ export const DAY = {
   day_pick: "날짜 선택",
 };
 
-export const MEAL = {
-  meal_lunch: "점심",
-  meal_dinner: "저녁",
+// 시간 선택: 점심·저녁 시간대별 칩
+export const TIME_SLOTS = {
+  점심: ["11:30", "12:00", "12:30", "13:00"],
+  저녁: ["17:30", "18:00", "18:30", "19:00", "19:30", "20:00"],
 };
 
 export const PLACE = {
   place_office: "회사",
   place_sinyongsan: "신용산역",
-  place_samgakji: "삼각지역",
   place_yongsan: "용산역",
+  place_samgakji: "삼각지역",
 };
 
 export const WALK = {
@@ -85,6 +86,9 @@ export const WALK = {
   walk_10: "10분",
   walk_15: "15분",
 };
+
+// 비회원 관계 배지. 거래처는 고객사, 나머지는 사내로 묶어요
+export const RELATIONS = ["임원", "상사", "거래처", "사내"];
 
 // 1인 예산 빠른 선택: [최소, 최대]. 최대 100000은 "10만원 이상"
 export const BUDGET_MAX = 100000;

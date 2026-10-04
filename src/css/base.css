@@ -431,6 +431,32 @@ input {
   color: var(--caution);
 }
 
+.btn-primary.btn-sm {
+  height: 44px;
+  font-size: 14px;
+}
+
+/* 보조 버튼 */
+.btn-secondary {
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-disabled);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .btn-primary:disabled {
   background: var(--text-disabled);
   cursor: not-allowed;

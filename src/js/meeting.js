@@ -1,5 +1,5 @@
 // ② 모임 만들기: 같이 갈 사람 고르기 + 모임 정보
-import { RANK, RANK_ROLE, PURPOSE, DAY, MEAL, PLACE, WALK, BUDGET_MAX, BUDGET_PRESETS } from "./labels.js";
+import { RANK, RANK_ROLE, PURPOSE, DAY, TIME_SLOTS, PLACE, WALK, RELATIONS, ALLERGY, DIET, BUDGET_MAX, BUDGET_PRESETS } from "./labels.js";
 import { KEYS, PAGES, load, save, loadData, goTo, toast, icon, setupTabBar } from "./common.js";
 
 const profile = load(KEYS.profile);
@@ -12,12 +12,12 @@ const DEFAULT_INFO = {
   budget: [0, 40000],
   day: "day_today",
   date: "",
-  meal: "meal_dinner",
+  time: "18:30",
   place: "place_office",
   walk: "walk_10",
 };
 
-const CHIP_GROUPS = { purpose: PURPOSE, day: DAY, meal: MEAL, place: PLACE, walk: WALK };
+const CHIP_GROUPS = { purpose: PURPOSE, day: DAY, place: PLACE, walk: WALK };
 
 const form = document.getElementById("meeting-form");
 const teamsEl = document.getElementById("teams");
@@ -27,6 +27,10 @@ const guestSearch = document.getElementById("guest-search");
 const GUEST_LIMIT = 30; // 검색 결과가 너무 많으면 이만큼만 보여 줘요
 const teamPicker = document.getElementById("team-picker");
 const teamOptions = document.getElementById("team-options");
+const timePicker = document.getElementById("time-picker");
+const timeOptions = document.getElementById("time-options");
+const addGuestBtn = document.getElementById("add-guest");
+const guestForm = document.getElementById("guest-form");
 
 let members = []; // 나를 포함한 회원
 let guests = [];
@@ -42,7 +46,8 @@ async function loadPeople() {
   // 나: 체험 계정이면 members.json의 내 행을, 직접 가입했으면 내 프로필을 팀 맨 위에
   const self = { ...(allMembers.find((m) => m.id === SELF_ID) ?? {}), ...profile, id: SELF_ID, is_member: true };
   members = [self, ...allMembers.filter((m) => m.id !== SELF_ID)];
-  guests = allGuests;
+  // 내가 추가한 비회원은 이 브라우저에만 저장돼요
+  guests = [...(load(KEYS.guests) ?? []), ...allGuests];
 }
 
 function isSelf(person) {
@@ -108,9 +113,14 @@ function syncTeamPicker() {
   });
 }
 
+// 펼침 패널 공통: 버튼의 aria-expanded와 패널 hidden을 함께 바꿔요
+function setPanel(button, panel, open) {
+  button.setAttribute("aria-expanded", String(open));
+  panel.hidden = !open;
+}
+
 function openTeamPicker(open) {
-  teamPicker.setAttribute("aria-expanded", String(open));
-  teamOptions.hidden = !open;
+  setPanel(teamPicker, teamOptions, open);
 }
 
 // 소속 팀 바꾸기: 나를 그 팀에 넣고, 그 팀 사람을 모두 고른 상태로 (비회원 선택은 그대로)
@@ -339,6 +349,30 @@ function syncChips() {
   dateInput.value = info.date;
   const pick = form.querySelector('[data-value="day_pick"]');
   pick.textContent = info.day === "day_pick" && info.date ? formatDate(info.date) : DAY.day_pick;
+  syncTimePicker();
+}
+
+// ---------- 시간 ----------
+
+function renderTimeOptions() {
+  timeOptions.innerHTML = Object.entries(TIME_SLOTS)
+    .map(
+      ([slot, times]) => `
+        <p class="division" id="slot-${slot}">${slot}</p>
+        <div class="chips chips-sm" role="group" aria-labelledby="slot-${slot}">
+          ${times.map((t) => `<button type="button" class="chip" data-time="${t}" aria-pressed="false">${t}</button>`).join("")}
+        </div>`,
+    )
+    .join("");
+}
+
+function syncTimePicker() {
+  document.getElementById("time-current").textContent = info.time || "시간 선택";
+  timePicker.classList.toggle("is-selected", Boolean(info.time));
+  timePicker.setAttribute("aria-label", info.time ? `시간 ${info.time}, 바꾸기` : "시간 선택");
+  timeOptions.querySelectorAll("[data-time]").forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip.dataset.time === info.time));
+  });
 }
 
 function formatDate(iso) {
@@ -413,6 +447,100 @@ function onBudgetInput(event) {
   }
   info.budget = [min, max];
   onChange();
+}
+
+// ---------- 비회원 추가 ----------
+
+const guestTitle = document.getElementById("guest-title");
+const guestOrg = document.getElementById("guest-org");
+const AVOID = { ...ALLERGY, ...DIET };
+let guestRelation = "거래처";
+const guestAvoid = new Set();
+
+function renderGuestFormChips() {
+  document.getElementById("guest-relation").innerHTML = RELATIONS.map(
+    (r) => `<button type="button" class="chip" data-relation="${r}" aria-pressed="false">${r}</button>`,
+  ).join("");
+  document.getElementById("guest-avoid").innerHTML = Object.entries(AVOID)
+    .map(([code, label]) => `<button type="button" class="chip" data-avoid="${code}" aria-pressed="false">${label}</button>`)
+    .join("");
+}
+
+function syncGuestForm() {
+  guestForm.querySelectorAll("[data-relation]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.relation === guestRelation)));
+  guestForm.querySelectorAll("[data-avoid]").forEach((c) => c.setAttribute("aria-pressed", String(guestAvoid.has(c.dataset.avoid))));
+}
+
+function openGuestForm(open) {
+  setPanel(addGuestBtn, guestForm, open);
+  if (open) {
+    guestTitle.value = guestSearch.value.trim(); // 검색하다 없어서 추가하는 경우 그대로 이어 쓰기
+    guestOrg.value = "";
+    guestRelation = "거래처";
+    guestAvoid.clear();
+    clearGuestError();
+    syncGuestForm();
+    guestTitle.focus();
+  } else {
+    addGuestBtn.focus();
+  }
+}
+
+function clearGuestError() {
+  document.getElementById("guest-title-error").textContent = "";
+  guestTitle.removeAttribute("aria-invalid");
+}
+
+function saveGuest() {
+  const title = guestTitle.value.trim();
+  const errorEl = document.getElementById("guest-title-error");
+  if (!title) {
+    errorEl.textContent = "호칭을 입력해 주세요";
+    guestTitle.setAttribute("aria-invalid", "true");
+    guestTitle.focus();
+    return;
+  }
+  const same = guests.find((g) => g.title === title);
+  if (same) {
+    errorEl.textContent = "이미 있는 비회원이에요. 아래 목록에서 골라 줬어요";
+    selected.add(same.id);
+    guestSearch.value = "";
+    renderGuests();
+    onChange();
+    return;
+  }
+
+  const guest = {
+    id: `gm${Date.now()}`,
+    title,
+    org: guestOrg.value.trim(),
+    group: guestRelation === "거래처" ? "고객사" : "사내",
+    relation: guestRelation,
+    allergies: [...guestAvoid].filter((c) => c.startsWith("allergy_")),
+    diet: [...guestAvoid].filter((c) => c.startsWith("diet_")),
+    likes: [],
+    dislikes: [],
+    needs: [],
+    memo: "",
+    history: [],
+    mine: true,
+  };
+  save(KEYS.guests, [guest, ...(load(KEYS.guests) ?? [])]);
+  guests.unshift(guest);
+  selected.add(guest.id);
+  guestSearch.value = "";
+  openGuestForm(false);
+  renderGuests();
+  onChange();
+  toast(`비회원을 추가하고 골랐어요 · ${title}`);
+}
+
+function onGuestFormClick(event) {
+  const relation = event.target.closest("[data-relation]");
+  const avoid = event.target.closest("[data-avoid]");
+  if (relation) guestRelation = relation.dataset.relation;
+  if (avoid) guestAvoid.has(avoid.dataset.avoid) ? guestAvoid.delete(avoid.dataset.avoid) : guestAvoid.add(avoid.dataset.avoid);
+  if (relation || avoid) syncGuestForm();
 }
 
 // ---------- 요약 · 저장 ----------
@@ -530,7 +658,45 @@ async function init() {
       teamPicker.focus();
     }
   });
-  document.getElementById("add-guest").addEventListener("click", () => goTo("people"));
+  // 시간
+  renderTimeOptions();
+  syncTimePicker();
+  timePicker.addEventListener("click", () => setPanel(timePicker, timeOptions, timeOptions.hidden));
+  timeOptions.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-time]");
+    if (!chip) return;
+    info.time = chip.dataset.time;
+    setPanel(timePicker, timeOptions, false);
+    timePicker.focus();
+    onChange();
+  });
+
+  // 비회원 추가
+  renderGuestFormChips();
+  addGuestBtn.addEventListener("click", () => openGuestForm(guestForm.hidden));
+  guestForm.addEventListener("click", onGuestFormClick);
+  document.getElementById("guest-cancel").addEventListener("click", () => openGuestForm(false));
+  document.getElementById("guest-save").addEventListener("click", saveGuest);
+  guestTitle.addEventListener("input", clearGuestError);
+  guestForm.addEventListener("keydown", (event) => {
+    // 입력칸에서 Enter를 눌러도 모임 전체가 제출되지 않게
+    if (event.key === "Enter" && event.target.tagName === "INPUT") {
+      event.preventDefault();
+      saveGuest();
+    }
+    if (event.key === "Escape") openGuestForm(false);
+  });
+
+  // 시간 패널도 바깥을 누르거나 Esc로 접어요
+  document.addEventListener("click", (event) => {
+    if (!timeOptions.hidden && !event.target.closest("#time-picker, #time-options")) setPanel(timePicker, timeOptions, false);
+  });
+  timeOptions.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setPanel(timePicker, timeOptions, false);
+      timePicker.focus();
+    }
+  });
 
   form.addEventListener("click", onInfoClick);
   budgetMin.addEventListener("input", onBudgetInput);

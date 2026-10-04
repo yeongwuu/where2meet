@@ -45,8 +45,8 @@
   outline-offset: 2px;
 }
 
-/* 펼친 팀 목록: 본부 이름 + 팀 칩 */
-.team-options {
+/* 펼침 패널 (소속 팀 · 시간 · 비회원 추가): 연한 회색 상자 */
+.picker-panel {
   margin-top: var(--space-8);
   padding: var(--space-12) var(--space-12) var(--space-16);
   border-radius: var(--radius-control);
@@ -352,6 +352,51 @@
 /* 칩 묶음 두 개를 한 줄에 이어서 */
 .chip-set {
   display: contents;
+}
+
+/* 시간 선택 칩: 고르면 주황, 누르면 시간 칩 패널이 펼쳐져요 */
+.chip-picker {
+  gap: 2px;
+  padding-right: 8px;
+}
+
+.chip-picker.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.chip-picker .icon {
+  transition: transform 0.15s;
+}
+
+.chip-picker.is-selected .icon {
+  color: inherit;
+}
+
+.chip-picker[aria-expanded="true"] .icon {
+  transform: rotate(180deg);
+}
+
+.walk-row {
+  margin-top: var(--space-8);
+}
+
+/* 비회원 추가 */
+.guest-form {
+  margin-bottom: var(--space-8);
+}
+
+.guest-form .field + .field {
+  margin-top: var(--space-12);
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
 }
 
 .date-input {
