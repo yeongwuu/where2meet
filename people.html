@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>어디서 모여? · 사람·기록</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="src/css/tokens.css">
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/people.css">
+  <script type="module" src="src/js/people.js"></script>
+</head>
+<body>
+  <div class="page has-tabs no-cta">
+    <!-- ⑤ 사람·기록 -->
+    <header class="page-header">
+      <div class="header-row">
+        <a class="home-link" href="index.html" aria-label="홈으로">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-house"/></svg>
+        </a>
+        <h1 class="header-title">사람·기록</h1>
+        <button type="button" class="link-btn header-action" id="add-guest" aria-haspopup="dialog">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-plus"/></svg>비회원 추가
+        </button>
+      </div>
+    </header>
+
+    <main class="page-body" id="people-body" aria-busy="true">
+      <!-- 지난 모임 후기: JS가 상태(쓰는 중 · 올림 · 없음)에 맞게 채워요 -->
+      <section aria-labelledby="review-title" id="review-section">
+        <h2 class="sr-only" id="review-title">지난 모임 후기</h2>
+        <div id="review-slot"></div>
+      </section>
+
+      <!-- 비회원 메모 -->
+      <section class="memo-section" aria-labelledby="memo-title">
+        <div class="memo-section-head">
+          <h2 class="heading" id="memo-title">비회원 메모</h2>
+          <span class="badge badge-subtle">나만 보기</span>
+        </div>
+        <p class="note">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-lock"/></svg>
+          <span>앱을 쓰지 않는 상사·거래처의 취향 메모예요. 나만 볼 수 있고, 실명 대신 호칭으로 적어 주세요</span>
+        </p>
+        <ul class="memo-list" id="memo-list"></ul>
+        <p class="empty-state" id="memo-empty" hidden>아직 적어 둔 메모가 없어요. 위의 비회원 추가로 시작해 보세요</p>
+      </section>
+
+      <p class="caption center">시연용 가상 데이터예요</p>
+    </main>
+
+    <!-- 비회원 추가 -->
+    <dialog class="dialog" id="guest-dialog" aria-labelledby="guest-dialog-title">
+      <h2 class="dialog-title" id="guest-dialog-title">비회원 추가</h2>
+      <div class="field dialog-field">
+        <label class="field-label" for="guest-title">호칭</label>
+        <input class="input" id="guest-title" maxlength="20" autocomplete="off" placeholder="예: B사 재무이사님, 인사팀 차장님" aria-describedby="guest-title-error">
+        <p class="field-error" id="guest-title-error" role="alert"></p>
+      </div>
+      <div class="field">
+        <label class="field-label" for="guest-org">회사·부서<span class="hint">선택</span></label>
+        <input class="input" id="guest-org" maxlength="20" autocomplete="off" placeholder="예: B사, 인사팀">
+      </div>
+      <div class="field">
+        <span class="field-label" id="label-relation">관계</span>
+        <div class="chips chips-sm" role="group" aria-labelledby="label-relation" id="guest-relation"></div>
+      </div>
+      <p class="note">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="assets/icons.svg#i-lock"/></svg>
+        <span>실명 대신 호칭으로 적어 주세요. 이 정보는 나만 볼 수 있어요</span>
+      </p>
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="guest-cancel">취소</button>
+        <button type="button" class="btn-primary btn-sm" id="guest-save">추가하기</button>
+      </div>
+    </dialog>
+
+    <nav class="tab-bar" aria-label="메뉴">
+      <a class="tab" data-tab="meeting">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg></span>모임
+      </a>
+      <a class="tab" data-tab="people" aria-current="page">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-book-open"/></svg></span>사람
+      </a>
+      <a class="tab" data-tab="start">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-user"/></svg></span>내 취향
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

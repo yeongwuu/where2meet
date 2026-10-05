@@ -12,7 +12,7 @@
   - `members.json`: 회원 120명, 14팀 (Assurance 1~8팀, Tax 1~3팀, Deals 1~3팀. 닉네임, 팀, 직급, 알레르기, 식단, 좋아하는 음식, 술, 분위기)
   - `restaurants.json`: 식당 30곳 (음식 종류, 알레르기 유발 재료, 식단 대응, 룸 여부, 수용 인원, 1인 가격)
   - `guests.json`: 비회원 104명 (사내 백오피스 26명, 고객사 A사~Z사 78명)
-  - `reviews.json`: 지난 모임 후기 (아직 비어 있음)
+  - `reviews.json`: 지난 모임 후기 샘플 48개
 - [화면 목업](docs/mockups/): V1~V5
 
 ## 화면 구성 (5페이지)
@@ -36,6 +36,9 @@ where2meet/
 ├── index.html         # 홈 (첫 화면)
 ├── start.html         # ① 시작하기 (내 프로필)
 ├── meeting.html       # ② 모임 만들기
+├── summary.html       # ③ 취향 종합
+├── result.html        # ④ 추천 결과
+├── people.html        # ⑤ 사람·기록 (후기 + 비회원 메모)
 ├── src/               # JS·CSS 소스
 ├── assets/            # 아이콘(icons.svg) 등 정적 파일
 ├── scripts/serve.py   # 로컬 미리보기 서버 (캐시 끔)
@@ -60,9 +63,9 @@ python3 scripts/serve.py
 | 홈 | `index.html` | 완료 (식당 둘러보기·후기 남기기·우리 팀 취향 메뉴는 준비 중) |
 | ① 시작하기 | `start.html` | 완료 |
 | ② 모임 만들기 | `meeting.html` | 완료 |
-| ③ 취향 종합 | | 예정 |
-| ④ 추천 결과 | | 예정 |
-| ⑤ 사람·기록 | | 예정 |
+| ③ 취향 종합 | `summary.html` | 완료 |
+| ④ 추천 결과 | `result.html` | 완료 |
+| ⑤ 사람·기록 | `people.html` | 완료 |
 
 ## 같이 작업하는 방법
 브랜치는 만들지 않고 모두 `main`에서 작업해요.

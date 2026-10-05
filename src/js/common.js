@@ -7,6 +7,8 @@ export const KEYS = {
   meeting: "w2m.meeting", // ② 작성 중인 모임
   guests: "w2m.guests", // ② 내가 추가한 비회원
   requests: "w2m.requests", // ② 취향 입력을 부탁한 사람 { id: 보낸 시각 }
+  reviews: "w2m.reviews", // ⑤ 내가 올린 후기
+  guestMemos: "w2m.guestMemos", // ⑤ 고친 비회원 메모 { 비회원 id: 바뀐 필드 }
 };
 
 // 체험 계정: 가상 동료 '하늘'(members.json p01)
@@ -55,7 +57,7 @@ export const PAGES = {
   meeting: "meeting.html", // ② 모임 만들기 (= 모임 탭)
   summary: "summary.html", // ③ 취향 종합
   result: "result.html", // ④ 추천 결과
-  people: null, // ⑤ 사람·기록 (= 사람 탭)
+  people: "people.html", // ⑤ 사람·기록 (= 사람 탭)
   restaurants: null, // 식당 둘러보기
   review: null, // 후기 남기기
   teamTaste: null, // 우리 팀 취향
