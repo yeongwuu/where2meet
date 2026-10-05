@@ -278,6 +278,12 @@ function renderSummary(need) {
 
   const sentences = [focus.length ? `${first}, ${focus.join(" · ")} 위주로 골랐어요.` : `${first}, 조건을 지키는 곳 중에서 골랐어요.`];
   const off = [!apply.character && "모임 성격", !apply.food && "음식 취향", !apply.drink && "술·분위기"].filter(Boolean);
+  // 1·2위가 동점이면 순서를 가격으로 정했다는 걸 알려 줘요 (순서·강조는 그대로)
+  const second = ranked[1];
+  if (second && Math.abs(best.score - second.score) < 1e-9) {
+    const pair = `${josa(best.r.name, "과", "와")} ${josa(second.r.name, "은", "는")} 똑같이 잘 맞아요.`;
+    sentences.push(best.r.price_per_person < second.r.price_per_person ? `${pair} 1인 금액이 낮은 곳을 먼저 보여 드려요.` : pair);
+  }
   if (off.length) sentences.push(`꺼 둔 ${josa(off.join("·"), "은", "는")} 순위에 넣지 않았어요.`);
   if (unknown().length) sentences.push(`취향 모름 ${unknown().length}명은 계산에서 빠졌어요.`);
 
