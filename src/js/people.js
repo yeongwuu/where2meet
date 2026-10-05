@@ -543,6 +543,10 @@ async function init() {
 
   reviewSlot.addEventListener("click", onReviewClick);
   reviewSlot.addEventListener("submit", postReview);
+  // 입력칸에서 Enter(한글 입력 마무리 포함)를 눌러도 후기가 바로 올라가지 않게, 올리기는 버튼으로만
+  reviewSlot.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && event.target.matches("input")) event.preventDefault();
+  });
   memoList.addEventListener("click", onMemoClick);
   setupGuestDialog();
 }
