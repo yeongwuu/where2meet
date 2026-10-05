@@ -24,8 +24,18 @@ const DRINK_FIT = {
   drink_light: "반주 정도에 맞아요",
   drink_enjoy: "술자리로 즐기기 좋아요",
 };
-const MOOD_OPPOSITE = { mood_quiet: "mood_lively", mood_lively: "mood_quiet" };
+// 술 결론과 두 단계 차이 날 때 ⚠
+const DRINK_MISMATCH = {
+  drink_none: "식사 중심이라 술자리로는 아쉬울 수 있어요",
+  drink_enjoy: "술자리 중심이라 술을 안 마시는 분은 불편할 수 있어요",
+};
+const MOOD_OPPOSITE ={ mood_quiet: "mood_lively", mood_lively: "mood_quiet" };
 const WEEKDAY = ["일", "월", "화", "수", "목", "금", "토"];
+// restaurants.json closed 코드 (Date.getDay() 순서)
+const DAY_CODES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+// "n명이 OO을 별로라고 했어요"에 쓰는 음식 이름
+const FOOD_PHRASE = { ...FOOD, food_asian: "아시안 음식" };
+const ROOM_TIGHT = 3; // 최대 인원 - 모임 인원이 이 이하면 ⚠
 
 const apply = { character: true, food: true, drink: true, ...meeting?.apply };
 let people = [];
@@ -102,7 +112,24 @@ function passes(r, need) {
   if (r.capacity < need.size) return false;
   if (r.price_per_person < min) return false;
   if (max < BUDGET_MAX && r.price_per_person > max) return false;
+  // 도보 시간은 회사 기준 데이터만 있어요. 역에서 모일 때는 거르지 않아요 (data_spec 5장)
+  const walkLimit = walkLimitMin();
+  if (meeting.place === "place_office" && walkLimit && r.walk_min > walkLimit) return false;
+  const date = meetingDate();
+  if (date && r.closed?.includes(DAY_CODES[date.getDay()])) return false;
+  if (meeting.time && r.hours && !isOpenAt(r.hours, meeting.time)) return false;
   return true;
+}
+
+// walk_10 → 10
+const walkLimitMin = () => Number(meeting.walk?.split("_")[1]) || null;
+
+// "17:00-02:00"처럼 자정을 넘기는 영업시간도 처리해요
+function isOpenAt(hours, time) {
+  const toMin = (hm) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
+  const [open, close] = hours.split("-").map(toMin);
+  const t = toMin(time);
+  return close > open ? t >= open && t < close : t >= open || t < close;
 }
 
 // 4-3 점수 + 4-4 근거 문장. ③에서 끈 항목은 점수와 근거에서 빼요
@@ -126,7 +153,11 @@ function scoreOf(r, need) {
   if (apply.food && list.length) {
     score += (WEIGHT.food * likers) / list.length;
     score -= (WEIGHT.dislike * dislikers) / list.length;
-    if (dislikers) warn.push(`${dislikers}명이 별로라고 한 음식이에요`);
+    // 음식마다 "1명이 아시안 음식을 별로라고 했어요" (좋아하는 음식이 같이 있는 사람은 빼요)
+    r.food.forEach((code) => {
+      const n = list.filter((p) => p.dislikes?.includes(code) && !overlaps(p.likes, r.food)).length;
+      if (n) warn.push(`${n}명이 ${josa(FOOD_PHRASE[code], "을", "를")} 별로라고 했어요`);
+    });
   }
 
   let drinkFit = false;
@@ -140,7 +171,7 @@ function scoreOf(r, need) {
     } else if (gap === 1) {
       score += WEIGHT.drink / 2;
     } else {
-      warn.push(`${DRINK_PLACE[r.drink]}인 곳이에요`);
+      warn.push(DRINK_MISMATCH[r.drink]);
     }
   }
 
@@ -160,15 +191,18 @@ function scoreOf(r, need) {
     if (r.private_room) {
       score += WEIGHT.room;
       roomFit = true;
-      ok.push(`룸 있음 · ${withWhom(need)} 모시기 좋아요`);
+      ok.push(`룸 ${r.capacity}인 · ${withWhom(need)} 모시기 좋아요`);
     } else {
       warn.push("룸이 없어요. 자리 배치를 미리 확인해 주세요");
     }
   } else if (r.private_room) {
-    ok.push(`룸 있음 · 최대 ${r.capacity}명`);
+    ok.push(`룸 ${r.capacity}인`);
   }
 
-  if (r.capacity - need.size <= 1) warn.push(`최대 ${r.capacity}명이라 인원이 늘면 자리가 빠듯해요`);
+  // 인원 여유: 목업 "룸이 12인이라 인원이 늘면 어려워요"
+  if (r.capacity - need.size <= ROOM_TIGHT) {
+    warn.push(`${r.private_room ? "룸이" : "최대"} ${r.capacity}인이라 인원이 늘면 어려워요`);
+  }
 
   return { r, score, likers, ok, warn, drinkFit, roomFit };
 }
@@ -196,16 +230,29 @@ function meetingName() {
   return wholeTeam ? `${teamShort} 전원 ${purpose.replace("팀 회식", "회식")}` : purpose;
 }
 
+// 모임 날짜. 날짜를 아직 안 골랐으면 null
+function meetingDate() {
+  if (meeting.day === "day_pick") return meeting.date ? new Date(`${meeting.date}T00:00`) : null;
+  if (meeting.day !== "day_today" && meeting.day !== "day_tomorrow") return null;
+  const date = new Date();
+  if (meeting.day === "day_tomorrow") date.setDate(date.getDate() + 1);
+  return date;
+}
+
 // "10월 6일(월) 18:30"
 function meetingWhen() {
-  let date;
-  if (meeting.day === "day_pick" && meeting.date) date = new Date(`${meeting.date}T00:00`);
-  else if (meeting.day === "day_today" || meeting.day === "day_tomorrow") {
-    date = new Date();
-    if (meeting.day === "day_tomorrow") date.setDate(date.getDate() + 1);
-  }
+  const date = meetingDate();
   const day = date ? `${date.getMonth() + 1}월 ${date.getDate()}일(${WEEKDAY[date.getDay()]})` : "";
   return [day, meeting.time].filter(Boolean).join(" ");
+}
+
+// 영업시간 · 휴무 · 주차 · 정보 확인일 한 줄. 없는 값은 빼요
+function infoLine(r) {
+  const closed = r.closed?.length ? `휴무 ${r.closed.map((c) => WEEKDAY[DAY_CODES.indexOf(c)]).join("·")}요일` : r.closed && "휴무 없음";
+  const parking = r.parking === undefined ? null : r.parking ? `주차 ${r.parking}대` : "주차 안 돼요";
+  const checked = r.info_checked && `정보 확인일 ${r.info_checked.replaceAll("-", ".")}`;
+  const parts = [r.hours?.replace("-", "~"), closed, parking, checked].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "영업시간 · 주차는 정보 준비 중이에요";
 }
 
 // 30000 → "약 3만원"
@@ -252,10 +299,11 @@ function cardHtml(item, rank, need) {
   const rating = mine.length ? (mine.reduce((s, v) => s + v.rating, 0) / mine.length).toFixed(1) : null;
   const confirmed = meeting.confirmed?.restaurant_id === r.id;
 
+  // 목업: "회사에서 도보 9분 · ★ 4.5 · 1인 약 3만원"
   const meta = [
+    r.walk_min !== undefined && `회사에서 도보 ${r.walk_min}분`,
     rating && `<span class="star">${icon("star", "icon-sm")}${rating}</span>`,
     `1인 ${price(r.price_per_person)}`,
-    `최대 ${r.capacity}명`,
   ].filter(Boolean).join(" · ");
 
   const likeBox = need.known
@@ -273,7 +321,7 @@ function cardHtml(item, rank, need) {
         <div class="thumb" aria-hidden="true">${icon("utensils")}<span>${FOOD[r.food[0]]}</span></div>
         <div class="rec-info">
           <h3 class="rec-name">${r.name}${isTop ? `<span class="badge badge-top">가장 잘 맞아요</span>` : ""}</h3>
-          <p class="rec-meta">${foodName(r)} · ${meta}</p>
+          <p class="rec-meta">${meta}</p>
         </div>
       </div>
       <p class="like-box">${likeBox}</p>
@@ -288,13 +336,19 @@ function cardHtml(item, rank, need) {
 }
 
 function detailHtml(r, need, mine, confirmed) {
+  const allergyCodes = Object.keys(ALLERGY).filter((c) => need.allergies[c]);
+  const allergyPeople = people.filter((p) => p.allergies?.length).length;
   const dietNames = Object.keys(DIET).filter((c) => need.diets[c]).map((c) => DIET[c]);
+  const walkLimit = walkLimitMin();
   // 오른쪽 근거는 인원만 보여 줘요. 누가 못 먹는지는 드러내지 않아요
   const rows = [
-    ["못 먹는 재료 없음", need.restricted ? `${need.restricted}명 반영` : "해당 없음"],
-    dietNames.length && [`${dietNames.join("·")} 대응`, "예약 때 요청"],
-    [r.private_room ? `룸 · 최대 ${r.capacity}명` : `최대 ${r.capacity}명`, `${need.size}명`],
+    allergyCodes.length
+      ? [`${allergyCodes.map((c) => ALLERGY[c]).join("·")} 없음`, `알레르기 ${allergyPeople}명`]
+      : ["알려진 알레르기 없음", "해당 없음"],
+    dietNames.length && [`${dietNames.join("·")} 대응`, "예약 때 미리 요청"],
+    [r.private_room ? `룸 ${r.capacity}인` : `최대 ${r.capacity}명`, `${need.size}명`],
     [`1인 ${price(r.price_per_person)}`, `예산 ${budgetLabel(meeting.budget ?? [0, BUDGET_MAX])}`],
+    meeting.place === "place_office" && r.walk_min !== undefined && [`회사에서 도보 ${r.walk_min}분`, walkLimit ? `${walkLimit}분 이내` : ""],
   ].filter(Boolean);
 
   const reviewBlock = mine.length
@@ -307,7 +361,7 @@ function detailHtml(r, need, mine, confirmed) {
     <ul class="check-list">
       ${rows.map(([label, basis]) => `<li>${icon("check")}<span class="check-label">${label}</span><span class="check-basis">${basis}</span></li>`).join("")}
     </ul>
-    <p class="info-line">영업시간 · 주차 · 위치는 정보 준비 중이에요</p>
+    <p class="info-line">${infoLine(r)}</p>
     ${reviewBlock}
     <div class="rec-actions">
       <button type="button" class="btn-secondary" data-action="copy">${icon("copy", "icon-sm")}공지 문구 복사</button>
@@ -328,11 +382,22 @@ function renderCards(need) {
   const shown = showAll ? ranked : ranked.slice(0, TOP_N);
   document.getElementById("rec-list").innerHTML = shown.map((item, i) => cardHtml(item, i, need)).join("");
 
-  const rest = ranked.length - shown.length;
-  document.getElementById("count-text").textContent = `조건을 모두 지키는 곳은 ${ranked.length}곳이에요`;
+  // "조건을 모두 지키는 곳은 4곳이에요 · 1곳 더 보기" → 누르면 나머지 카드가 이어서 나와요
+  const extra = ranked.length - TOP_N;
+  document.getElementById("count-text").textContent =
+    `조건을 모두 지키는 곳은 ${ranked.length}곳이에요` + (extra > 0 ? " ·" : "");
   const more = document.getElementById("more");
-  more.hidden = rest <= 0;
-  more.textContent = `${rest}곳 더 보기`;
+  more.hidden = extra <= 0;
+  more.textContent = showAll ? "처음 3곳만 보기" : `${extra}곳 더 보기`;
+  more.setAttribute("aria-expanded", String(showAll));
+}
+
+function toggleMore() {
+  showAll = !showAll;
+  // 접을 때 펼쳐 둔 카드가 숨으면 1순위를 다시 펼쳐요
+  if (!showAll && ranked.findIndex((x) => x.r.id === openId) >= TOP_N) openId = ranked[0].r.id;
+  renderCards(currentNeed);
+  if (showAll) document.querySelectorAll(".rec-card")[TOP_N]?.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
 // ---------- 동작 ----------
@@ -433,10 +498,7 @@ async function init() {
   document.getElementById("recheck").hidden = false;
 
   document.getElementById("rec-list").addEventListener("click", onListClick);
-  document.getElementById("more").addEventListener("click", () => {
-    showAll = true;
-    renderCards(currentNeed);
-  });
+  document.getElementById("more").addEventListener("click", toggleMore);
 }
 
 setupTabBar();
