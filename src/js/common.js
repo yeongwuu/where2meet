@@ -54,7 +54,7 @@ export const PAGES = {
   start: "start.html", // ① 시작하기 (= 내 취향 탭)
   meeting: "meeting.html", // ② 모임 만들기 (= 모임 탭)
   summary: "summary.html", // ③ 취향 종합
-  result: null, // ④ 추천 결과
+  result: "result.html", // ④ 추천 결과
   people: null, // ⑤ 사람·기록 (= 사람 탭)
   restaurants: null, // 식당 둘러보기
   review: null, // 후기 남기기

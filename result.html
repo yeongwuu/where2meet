@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>어디서 모여? · 추천 결과</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="src/css/tokens.css">
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/result.css">
+  <script type="module" src="src/js/result.js"></script>
+</head>
+<body>
+  <div class="page has-tabs no-cta">
+    <!-- ④ 추천 결과 -->
+    <header class="page-header">
+      <div class="header-row">
+        <a class="home-link" href="summary.html" aria-label="취향 종합으로 돌아가기">
+          <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-left"/></svg>
+        </a>
+        <h1 class="header-title">추천 결과</h1>
+        <a class="link-btn header-action" href="summary.html" id="edit-link">조건 고치기</a>
+      </div>
+    </header>
+
+    <main class="page-body" id="result-body" aria-busy="true">
+      <!-- 모임이 없을 때 -->
+      <section class="empty-state" id="no-meeting" hidden>
+        <p>아직 만든 모임이 없어요.<br>같이 갈 사람과 모임 정보를 먼저 정해 주세요</p>
+        <a class="btn-primary btn-sm" href="meeting.html">모임 만들기</a>
+      </section>
+
+      <!-- 조건을 지키는 곳이 없을 때 -->
+      <section class="empty-state" id="no-result" hidden>
+        <p>조건을 모두 지키는 곳이 없어요.<br>예산이나 인원을 바꿔 보세요</p>
+        <a class="btn-secondary btn-link" href="meeting.html">모임 정보 고치기</a>
+      </section>
+
+      <!-- AI 요약 박스 -->
+      <section class="card ai-box" id="ai-box" hidden>
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-sparkles"/></svg>
+        <p id="ai-text"></p>
+      </section>
+
+      <!-- 아코디언 추천 카드 -->
+      <h2 class="sr-only" id="list-title">추천 식당</h2>
+      <ol class="rec-list" id="rec-list" aria-labelledby="list-title"></ol>
+
+      <div class="count-box" id="count-box" hidden>
+        <span id="count-text"></span>
+        <button type="button" class="link-btn" id="more" hidden></button>
+      </div>
+
+      <p class="caption center" id="recheck" hidden>알레르기·식단 정보는 방문 전 식당에 한 번 더 확인해 주세요</p>
+      <p class="caption center">시연용 가상 데이터예요</p>
+    </main>
+
+    <nav class="tab-bar" aria-label="메뉴">
+      <a class="tab" data-tab="meeting" aria-current="page">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-users"/></svg></span>모임
+      </a>
+      <a class="tab" data-tab="people" href="#">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-book-open"/></svg></span>사람
+      </a>
+      <a class="tab" data-tab="start">
+        <span class="tab-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-user"/></svg></span>내 취향
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

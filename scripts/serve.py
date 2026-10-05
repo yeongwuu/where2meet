@@ -19,7 +19,8 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("", PORT), NoCacheHandler) as httpd:
+socketserver.ThreadingTCPServer.allow_reuse_address = True
+socketserver.ThreadingTCPServer.daemon_threads = True  # 브라우저가 열어 둔 연결 하나가 다른 요청을 막지 않게
+with socketserver.ThreadingTCPServer(("", PORT), NoCacheHandler) as httpd:
     print(f"http://localhost:{PORT} 에서 보고 있어요. 끄려면 Ctrl + C")
     httpd.serve_forever()
