@@ -29,6 +29,7 @@ let guests = []; // 파일 비회원 + 내가 추가한 비회원에 고친 메�
 let editingId = null; // 지금 고치는 메모 카드 (한 번에 하나)
 const fresh = new Map(); // 방금 올린 후기에서 추가된 기록 { 비회원 id: 내용 }
 let flash = false; // 후기를 올린 직후 한 번만 하이라이트를 반짝여요
+const openHistory = new Set(); // 이전 기록을 펼친 카드
 const draft = { rating: 0, chips: new Set() };
 
 // ---------- 도구 ----------
@@ -297,14 +298,40 @@ function memoHtml(g) {
     </li>`;
 }
 
-function historyHtml(g) {
-  if (fresh.has(g.id)) {
-    return `<p class="memo-history is-fresh${flash ? " is-flash" : ""}">${icon("sparkles", "icon-sm")}<span>방금 후기에서 추가 · ${esc(fresh.get(g.id))}</span></p>`;
-  }
-  const h = lastHistory(g);
-  if (!h) return `<p class="memo-history">아직 기록이 없어요</p>`;
+function historyText(h) {
   const text = h.from_review_id ? `후기에서 추가 · ${h.text}` : h.text;
-  return `<p class="memo-history">${dotDate(h.date)} ${esc(text)}</p>`;
+  return `${dotDate(h.date)} ${esc(text)}`;
+}
+
+// 기록 줄: 최근 한 줄만 보이고, 이전 기록은 "기록 n개 더 보기"로 최신순 펼침
+function historyHtml(g) {
+  const history = g.history ?? [];
+  const older = history.slice(0, -1).reverse();
+  const open = openHistory.has(g.id);
+  const toggle = older.length
+    ? `<button type="button" class="history-toggle" data-action="history" aria-expanded="${open}" aria-controls="history-${g.id}">
+        <span>${open ? "접기" : `기록 ${older.length}개 더 보기`}</span>${icon("chevron-down", "icon-sm")}
+      </button>`
+    : "";
+  let line;
+  if (fresh.has(g.id)) line = `${icon("sparkles", "icon-sm")}<span class="history-text">방금 후기에서 추가 · ${esc(fresh.get(g.id))}</span>`;
+  else if (history.length) line = `<span class="history-text">${historyText(history.at(-1))}</span>`;
+  else line = `<span class="history-text">아직 기록이 없어요</span>`;
+
+  return `
+    <p class="memo-history${fresh.has(g.id) ? " is-fresh" : ""}${flash && fresh.has(g.id) ? " is-flash" : ""}">${line}${toggle}</p>
+    ${older.length ? `<ul class="history-list" id="history-${g.id}" aria-label="이전 기록" ${open ? "" : "hidden"}>${older.map((h) => `<li>${historyText(h)}</li>`).join("")}</ul>` : ""}`;
+}
+
+// 다른 카드를 고치는 중일 수 있어서 목록을 다시 그리지 않고 그 자리에서만 펼쳐요
+function toggleHistory(card, button) {
+  const id = card.dataset.id;
+  const open = !openHistory.has(id);
+  open ? openHistory.add(id) : openHistory.delete(id);
+  const count = (guestById(id).history?.length ?? 1) - 1;
+  button.setAttribute("aria-expanded", String(open));
+  button.querySelector("span").textContent = open ? "접기" : `기록 ${count}개 더 보기`;
+  card.querySelector(".history-list").hidden = !open;
 }
 
 // ---------- 메모 고치기 ----------
@@ -408,6 +435,7 @@ function onMemoClick(event) {
     else startEdit(g);
   } else if (action === "save") saveEdit(g);
   else if (action === "cancel") stopEdit(g.id);
+  else if (action === "history") toggleHistory(card, event.target.closest("[data-action]"));
 }
 
 // ---------- 비회원 추가 ----------

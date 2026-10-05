@@ -308,6 +308,67 @@
   margin-top: 1px;
 }
 
+.history-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 기록 n개 더 보기: 회색 박스 오른쪽 */
+.history-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  margin: -8px -6px -8px 0;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: var(--radius-box);
+  background: none;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.history-toggle .icon {
+  margin-top: 0;
+  transition: transform 0.15s;
+}
+
+.history-toggle[aria-expanded="true"] .icon {
+  transform: rotate(180deg);
+}
+
+.history-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.is-fresh .history-toggle {
+  color: var(--primary-pressed);
+}
+
+/* 펼친 이전 기록 (최신순) */
+.history-list {
+  margin: var(--space-8) 0 0;
+  padding: 0 0 0 var(--space-12);
+  border-left: 2px solid var(--border);
+  list-style: none;
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.history-list li + li {
+  margin-top: var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-toggle .icon {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .memo-history.is-flash {
     animation: fresh-in 0.6s ease-out;
