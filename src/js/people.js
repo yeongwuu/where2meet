@@ -414,7 +414,8 @@ function saveEdit(g) {
   };
   const changed = Object.keys(fields).some((k) => JSON.stringify(fields[k]) !== JSON.stringify(g[k] ?? (k === "memo" ? "" : [])));
   if (changed) {
-    const first = !g.history?.length;
+    // 적어 둔 내용이 하나도 없던 비회원일 때만 "처음 작성"
+    const first = !g.memo && ![g.history, g.likes, g.dislikes, g.needs, g.allergies, g.diet].some((list) => list?.length);
     fields.history = [...(g.history ?? []), { date: ymd(new Date()), text: first ? "메모 처음 작성" : "메모 수정", from_review_id: null }];
     saveMemo(g.id, fields);
     fresh.delete(g.id);
