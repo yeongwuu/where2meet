@@ -47,6 +47,43 @@
         <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-right"/></svg>
       </button>
 
+      <!-- 식당을 확정했는데 후기를 아직 안 남겼을 때만 -->
+      <button type="button" class="row-card" id="review-due" hidden>
+        <span class="row-main">
+          <strong>후기 남기기</strong> · <span id="review-due-label"></span>
+        </span>
+        <span class="badge badge-soft">1건 남음</span>
+        <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#i-chevron-right"/></svg>
+      </button>
+
+      <!-- 이렇게 진행돼요: 앱 흐름 안내 -->
+      <section class="card steps-card" aria-labelledby="steps-title">
+        <h2 class="heading" id="steps-title">이렇게 진행돼요</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <div>
+              <p class="step-title">같이 갈 사람 고르기</p>
+              <p class="step-sub">팀을 고르면 팀원이 모두 체크돼요. 비회원도 더할 수 있어요</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <div>
+              <p class="step-title">모두의 취향 종합</p>
+              <p class="step-sub">못 먹는 것은 반드시 빼고, 좋아하는 음식과 분위기를 모아요</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <div>
+              <p class="step-title">잘 맞는 식당 추천</p>
+              <p class="step-sub">조건을 지키는 곳 중 3곳을 근거와 함께 보여 줘요</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
       <p class="caption home-footnote">시연용 가상 데이터예요. 실제 식당 정보와 다를 수 있어요</p>
     </main>
 

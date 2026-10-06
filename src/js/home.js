@@ -1,4 +1,4 @@
-// 홈: 모임 만들기(프로필이 없으면 ① 먼저) + 이어서 하기
+// 홈: 모임 만들기(프로필이 없으면 ① 먼저) + 이어서 하기 · 후기 남기기 + 진행 안내
 import { PURPOSE } from "./labels.js";
 import { KEYS, isTrial, leaveTrial, load, goTo, setupTabBar } from "./common.js";
 
@@ -27,6 +27,18 @@ function renderResume() {
   row.addEventListener("click", () => goTo("meeting"));
 }
 
+// 식당을 확정했는데 이 모임 후기를 아직 안 남겼으면 ⑤로 안내해요 (⑤ people.js와 같은 기준: confirmed_at)
+function renderReviewDue() {
+  const confirmed = draft?.confirmed;
+  if (!profile || !confirmed) return;
+  const posted = (load(KEYS.reviews) ?? []).some((v) => v.confirmed_at === confirmed.confirmedAt);
+  if (posted) return;
+  const row = document.getElementById("review-due");
+  document.getElementById("review-due-label").textContent = confirmed.name;
+  row.hidden = false;
+  row.addEventListener("click", () => goTo("people"));
+}
+
 // 모임 만들기: 프로필이 있으면 ②, 없으면 ①부터
 function startMeeting() {
   goTo(profile ? "meeting" : "start");
@@ -46,6 +58,7 @@ renderGreeting();
 renderTrialBanner();
 renderMeetingCard();
 renderResume();
+renderReviewDue();
 setupTabBar();
 
 document.getElementById("start-meeting").addEventListener("click", startMeeting);

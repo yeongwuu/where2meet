@@ -60,6 +60,56 @@
   line-height: 1.45;
 }
 
+/* 후기 남기기 줄: 이어서 하기와 같은 한 줄 카드 + 1건 남음 배지 */
+#review-due .row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 이렇게 진행돼요: 번호 원을 세로선으로 이어요 */
+.steps {
+  margin: var(--space-16) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: var(--space-12);
+  padding-bottom: var(--space-16);
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+.step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  bottom: 4px;
+  left: 11px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+}
+
+.step-title {
+  margin: 1px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.step-sub {
+  margin: 2px 0 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .home-footnote {
   text-align: center;
   padding-top: var(--space-4);

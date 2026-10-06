@@ -60,7 +60,7 @@ python3 scripts/serve.py
 ## 화면 진행 상황
 | 화면 | 파일 | 상태 |
 |---|---|---|
-| 홈 | `index.html` | 완료 (모임 만들기 · 이어서 하기) |
+| 홈 | `index.html` | 완료 (모임 만들기 · 이어서 하기 · 후기 남기기 알림 · 진행 안내) |
 | ① 시작하기 | `start.html` | 완료 |
 | ② 모임 만들기 | `meeting.html` | 완료 |
 | ③ 취향 종합 | `summary.html` | 완료 |
