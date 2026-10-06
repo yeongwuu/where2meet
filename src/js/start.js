@@ -1,5 +1,5 @@
 // ① 시작하기: 기본 정보 + 내 취향 입력, 체험 계정으로 바로 시작
-import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE } from "./labels.js";
+import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE, NOT_TODAY_MAX } from "./labels.js";
 import { KEYS, TRIAL_ID, isTrial, leaveTrial, load, save, loadData, goTo, toast, setupTabBar } from "./common.js";
 
 const INVITE_CODE = "Fit-stop"; // 사내초대코드. 처음 온 사람에게는 미리 채워 둬요
@@ -9,8 +9,7 @@ const OPTIONS = {
   rank: RANK,
   allergies: { ...ALLERGY, [NONE]: "해당 없어요" },
   diet: { ...DIET, [NONE]: "해당 없어요" },
-  likes: FOOD,
-  dislikes: FOOD,
+  not_today: FOOD,
   drink: DRINK,
   mood: MOOD,
 };
@@ -71,17 +70,17 @@ function onChipClick(event) {
 
   let next = wasOn ? getSelected(name).filter((v) => v !== value) : [...getSelected(name), value];
 
+  // 정해진 개수까지만 골라요. 넘치면 고르지 않고 안내만 해요
+  if (mode === "multi-max" && !wasOn && next.length > NOT_TODAY_MAX) {
+    toast(`${NOT_TODAY_MAX}개까지 고를 수 있어요. 하나를 빼고 다시 골라 주세요`);
+    return;
+  }
+
   // "해당 없어요"는 다른 항목과 같이 고를 수 없어요
   if (mode === "multi-none" && !wasOn) {
     next = value === NONE ? [NONE] : next.filter((v) => v !== NONE);
   }
   setSelected(name, next);
-
-  // 같은 음식을 좋아함과 별로에 동시에 고를 수 없어요
-  if (!wasOn && (name === "likes" || name === "dislikes")) {
-    const other = name === "likes" ? "dislikes" : "likes";
-    setSelected(other, getSelected(other).filter((v) => v !== value));
-  }
 
   if (name === "allergies" || name === "diet") clearError("avoid-error");
 }
@@ -135,7 +134,8 @@ function validate() {
 
 // ---------- 저장 · 불러오기 ----------
 
-// 화면 입력 → members.json과 같은 모양의 프로필 (rank, dislikes는 추가 필드)
+// 화면 입력 → members.json과 같은 모양의 프로필
+// likes·dislikes는 더 이상 묻지 않아요. 이전에 저장한 값은 저장할 때 그대로 남겨요 (③·④가 아직 써요)
 function readForm() {
   const withoutNone = (values) => values.filter((v) => v !== NONE);
   return {
@@ -144,8 +144,7 @@ function readForm() {
     rank: getSelected("rank")[0] ?? null,
     allergies: withoutNone(getSelected("allergies")),
     diet: withoutNone(getSelected("diet")),
-    likes: getSelected("likes"),
-    dislikes: getSelected("dislikes"),
+    not_today: getSelected("not_today"),
     drink: getSelected("drink")[0] ?? null,
     mood: getSelected("mood")[0] ?? null,
   };
@@ -160,8 +159,7 @@ function fillForm(profile, inviteCode = "") {
   setSelected("rank", [profile.rank ?? DEFAULTS.rank[0]]);
   setSelected("allergies", profile.allergies?.length ? profile.allergies : [NONE]);
   setSelected("diet", profile.diet?.length ? profile.diet : [NONE]);
-  setSelected("likes", profile.likes ?? []);
-  setSelected("dislikes", profile.dislikes ?? []);
+  setSelected("not_today", (profile.not_today ?? []).slice(0, NOT_TODAY_MAX));
   setSelected("drink", profile.drink ? [profile.drink] : DEFAULTS.drink);
   setSelected("mood", profile.mood ? [profile.mood] : DEFAULTS.mood);
 }
