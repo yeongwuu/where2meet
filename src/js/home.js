@@ -17,8 +17,9 @@ function renderMeetingCard() {
   }
 }
 
+// 작성 중인 모임만 보여 줘요. ④에서 확정한 모임은 숨겨요 (모임 정보는 ⑤ 후기에서 쓰니까 지우지 않아요)
 function renderResume() {
-  if (!profile || !draft?.people?.length) return;
+  if (!profile || !draft?.people?.length || draft.confirmed) return;
   const row = document.getElementById("resume");
   const team = draft.team ? `${draft.team} ` : "";
   document.getElementById("resume-label").textContent = `${team}${PURPOSE[draft.purpose] ?? "모임"} (작성 중)`;
