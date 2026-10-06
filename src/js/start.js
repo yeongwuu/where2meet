@@ -1,6 +1,6 @@
 // ① 시작하기: 기본 정보 + 내 취향 입력, 체험 계정으로 바로 시작
 import { FOOD, ALLERGY, DIET, DRINK, MOOD, RANK, NONE } from "./labels.js";
-import { KEYS, TRIAL_ID, isTrial, leaveTrial, load, save, loadData, goTo, toast } from "./common.js";
+import { KEYS, TRIAL_ID, isTrial, leaveTrial, load, save, loadData, goTo, toast, setupTabBar } from "./common.js";
 
 const INVITE_CODE = "Fit-stop"; // 사내초대코드. 처음 온 사람에게는 미리 채워 둬요
 
@@ -174,6 +174,7 @@ async function loadTrialProfile() {
 // ---------- 시작 ----------
 
 let savedProfile = load(KEYS.profile);
+setupTabBar();
 renderChips();
 fillForm(savedProfile ?? {}, INVITE_CODE);
 if (!savedProfile) {

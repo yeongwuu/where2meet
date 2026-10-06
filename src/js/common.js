@@ -58,9 +58,6 @@ export const PAGES = {
   summary: "summary.html", // ③ 취향 종합
   result: "result.html", // ④ 추천 결과
   people: "people.html", // ⑤ 사람·기록 (= 사람 탭)
-  restaurants: null, // 식당 둘러보기
-  review: null, // 후기 남기기
-  teamTaste: null, // 우리 팀 취향
 };
 
 export function goTo(page) {

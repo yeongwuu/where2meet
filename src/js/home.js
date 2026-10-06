@@ -1,6 +1,6 @@
-// 홈: 모임 만들기(프로필이 없으면 ① 먼저) + 다른 메뉴
+// 홈: 모임 만들기(프로필이 없으면 ① 먼저) + 이어서 하기
 import { PURPOSE } from "./labels.js";
-import { KEYS, isTrial, leaveTrial, load, loadData, goTo, setupTabBar } from "./common.js";
+import { KEYS, isTrial, leaveTrial, load, goTo, setupTabBar } from "./common.js";
 
 const profile = load(KEYS.profile);
 const draft = load(KEYS.meeting);
@@ -26,18 +26,6 @@ function renderResume() {
   row.addEventListener("click", () => goTo("meeting"));
 }
 
-async function renderCounts() {
-  try {
-    const restaurants = await loadData("restaurants");
-    document.getElementById("restaurants-sub").textContent = `식당 ${restaurants.length}곳을 음식·예산·룸·알레르기 대응으로 골라 보기`;
-  } catch {
-    // 숫자 없이 기본 문구 그대로
-  }
-  if (profile?.team) {
-    document.getElementById("team-sub").textContent = `${profile.team}의 못 먹는 것과 좋아하는 음식 한눈에`;
-  }
-}
-
 // 모임 만들기: 프로필이 있으면 ②, 없으면 ①부터
 function startMeeting() {
   goTo(profile ? "meeting" : "start");
@@ -57,10 +45,6 @@ renderGreeting();
 renderTrialBanner();
 renderMeetingCard();
 renderResume();
-renderCounts();
 setupTabBar();
 
 document.getElementById("start-meeting").addEventListener("click", startMeeting);
-document.querySelectorAll("[data-go]").forEach((card) => {
-  card.addEventListener("click", () => goTo(card.dataset.go));
-});

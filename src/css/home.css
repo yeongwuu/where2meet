@@ -60,47 +60,6 @@
   line-height: 1.45;
 }
 
-/* 메뉴 목록 */
-.menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-}
-
-.menu-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  width: 100%;
-  padding: 14px var(--space-16);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  background: var(--bg);
-  text-align: left;
-  cursor: pointer;
-}
-
-.menu-card:hover {
-  border-color: var(--primary-mid);
-}
-
-.menu-card:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.menu-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.menu-title {
-  display: block;
-  color: var(--ink);
-  font-size: 16px;
-  font-weight: 700;
-}
-
 .home-footnote {
   text-align: center;
   padding-top: var(--space-4);

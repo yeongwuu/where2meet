@@ -64,3 +64,8 @@
   text-align: center;
   padding-top: var(--space-4);
 }
+
+/* 하단 탭과 저장 버튼 위로 안내 문구 띄우기 */
+.page.has-tabs ~ .toast {
+  bottom: 190px;
+}
