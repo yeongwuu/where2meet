@@ -45,6 +45,9 @@ export const RANK = {
   rank_partner: "파트너·임원",
 };
 
+// ① "오늘은 먹고 싶지 않은 음식"(not_today)으로 고를 수 있는 최대 개수. 0개도 괜찮아요
+export const NOT_TODAY_MAX = 2;
+
 // 알레르기·식이 제한에서 "해당 없어요"를 뜻하는 칩 값
 export const NONE = "none";
 
