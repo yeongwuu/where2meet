@@ -281,7 +281,8 @@ function infoHtml(r) {
   if (r.hours) {
     const lines = [r.closed?.length ? hoursText(r.hours) : `매일 ${hoursText(r.hours)}`];
     if (r.break_time) lines.push(`브레이크타임 ${hoursText(r.break_time)}`);
-    if (r.last_order) lines.push(`라스트 오더 ${r.last_order}`);
+    // 라스트 오더가 문 연 시각보다 이르면 자정을 넘긴 거예요 (예: 17:00 열고 01:00)
+    if (r.last_order) lines.push(`라스트 오더 ${r.last_order < r.hours.slice(0, 5) ? "다음 날 " : ""}${r.last_order}`);
     rows.push(row("clock", "영업시간", lines));
   }
   if (r.closed) rows.push(row("calendar-x", "휴무", [r.closed.length ? `매주 ${days(r.closed)}요일 정기휴무` : "연중무휴"]));
