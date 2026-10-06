@@ -1,5 +1,5 @@
 // ⑤ 사람·기록: ④에서 확정한 모임의 후기를 올리고, 비회원 메모를 보고 고쳐요. 데이터는 docs/data_spec.md 3-3·3-4·3-7 기준
-import { FOOD, ALLERGY, DIET, RANK_ROLE, PURPOSE, RELATIONS } from "./labels.js";
+import { ALLERGY, DIET, RANK_ROLE, PURPOSE, RELATIONS } from "./labels.js";
 import { KEYS, PAGES, load, save, loadData, toast, icon, setupTabBar } from "./common.js";
 
 const profile = load(KEYS.profile);
@@ -125,6 +125,10 @@ function renderReview() {
   const r = restaurants.find((x) => x.id === meeting.confirmed.restaurant_id);
   const date = meetingDate();
   const meta = [meetingName(), r?.name ?? meeting.confirmed.name, `${date.getMonth() + 1}.${date.getDate()}`].join(" · ");
+  if (isLater()) {
+    reviewSlot.innerHTML = laterHtml(meta);
+    return;
+  }
   reviewSlot.innerHTML = `
     <form class="card review-card" id="review-form" novalidate>
       <div class="review-head">
@@ -149,7 +153,38 @@ function renderReview() {
       ${meetingGuests().map(noteBoxHtml).join("")}
 
       <button type="submit" class="btn-primary review-submit">후기 올리기</button>
+      <button type="button" class="link-btn review-later" data-action="later">다음에 하기</button>
     </form>`;
+}
+
+// ---------- 다음에 하기 ----------
+
+// 확정 시각(confirmedAt)으로 어느 모임 후기인지 구분해요 (홈 알림과 같은 기준)
+const laterList = () => load(KEYS.reviewLater) ?? [];
+const isLater = () => laterList().includes(meeting.confirmed.confirmedAt);
+
+function laterHtml(meta) {
+  return `
+    <div class="card review-later-card" id="review-later" tabindex="-1">
+      <div>
+        <p class="review-later-title">지난 모임 후기</p>
+        <p class="review-meta">${esc(meta)} · 다음에 쓰기로 했어요</p>
+      </div>
+      <button type="button" class="btn-secondary" data-action="write-now">지금 쓰기</button>
+    </div>`;
+}
+
+function reviewLater() {
+  save(KEYS.reviewLater, [...new Set([...laterList(), meeting.confirmed.confirmedAt])]);
+  renderReview();
+  document.getElementById("review-later").focus();
+  toast("홈에서는 더 이상 알리지 않을게요. 여기서 언제든 쓸 수 있어요");
+}
+
+function writeNow() {
+  save(KEYS.reviewLater, laterList().filter((at) => at !== meeting.confirmed.confirmedAt));
+  renderReview();
+  reviewSlot.querySelector("[data-rating]")?.focus();
 }
 
 // "OO님에 대해 알게 된 것": 모임에 같이 간 비회원마다 하나씩
@@ -182,6 +217,9 @@ function syncDraft() {
 }
 
 function onReviewClick(event) {
+  const action = event.target.closest("[data-action]")?.dataset.action;
+  if (action === "later") return reviewLater();
+  if (action === "write-now") return writeNow();
   const star = event.target.closest("[data-rating]");
   const chip = event.target.closest("[data-chip]");
   if (star) {
@@ -270,9 +308,6 @@ function renderMemos() {
 const relationBadge = (g) =>
   `<span class="badge ${g.relation === "사내" ? "badge-subtle" : "badge-soft"}">${esc(g.relation)}</span>`;
 
-const tags = (codes, extra = "") =>
-  codes?.length ? codes.map((c) => `<span class="tag ${extra}">${FOOD[c] ?? c}</span>`).join("") : `<span class="unknown">아직 몰라요</span>`;
-
 function memoHtml(g) {
   const avoid = [...(g.allergies ?? []), ...(g.diet ?? [])].map((c) => AVOID[c]);
   const needs = g.needs?.length ? g.needs.map((n) => `${esc(n)} 필요`).join(" · ") : "없음";
@@ -286,10 +321,6 @@ function memoHtml(g) {
       <dl class="memo-grid">
         <dt>못 먹는 것</dt>
         <dd class="${avoid.length ? "is-caution" : "is-strong"}">${avoid.length ? avoid.join(", ") : "없음"}</dd>
-        <dt>좋아함</dt>
-        <dd class="tags">${tags(g.likes)}</dd>
-        <dt>별로</dt>
-        <dd class="tags">${tags(g.dislikes, "tag-line")}</dd>
         <dt>꼭 필요</dt>
         <dd class="is-strong">${needs}</dd>
       </dl>
@@ -336,7 +367,8 @@ function toggleHistory(card, button) {
 
 // ---------- 메모 고치기 ----------
 
-const editDraft = { avoid: new Set(), likes: new Set(), dislikes: new Set(), needs: new Set() };
+// 비회원 메모는 못 먹는 것·꼭 필요·메모만 고쳐요 (좋아함·별로는 없앴어요. 예전 값은 데이터에 그대로 둬요)
+const editDraft = { avoid: new Set(), needs: new Set() };
 
 function chipGroup(group, label, options) {
   const id = `edit-${group}`;
@@ -358,8 +390,6 @@ function editHtml(g) {
         ${relationBadge(g)}
       </div>
       ${chipGroup("avoid", "못 먹는 것<span class=\"hint\">아는 것만</span>", AVOID)}
-      ${chipGroup("likes", "좋아함", FOOD)}
-      ${chipGroup("dislikes", "별로", FOOD)}
       ${chipGroup("needs", "꼭 필요", Object.fromEntries(NEEDS.map((n) => [n, n])))}
       <div class="field">
         <label class="field-label" for="edit-memo">메모</label>
@@ -376,8 +406,6 @@ function editHtml(g) {
 function startEdit(g) {
   editingId = g.id;
   editDraft.avoid = new Set([...(g.allergies ?? []), ...(g.diet ?? [])]);
-  editDraft.likes = new Set(g.likes ?? []);
-  editDraft.dislikes = new Set(g.dislikes ?? []);
   editDraft.needs = new Set(g.needs ?? []);
   renderMemos();
   const card = memoList.querySelector(`[data-id="${g.id}"]`);
@@ -395,9 +423,6 @@ function toggleEditChip(chip) {
   const { group, code } = chip.dataset;
   const set = editDraft[group];
   set.has(code) ? set.delete(code) : set.add(code);
-  // 같은 음식을 좋아함·별로에 동시에 둘 수 없어요
-  const other = { likes: "dislikes", dislikes: "likes" }[group];
-  if (other && set.has(code)) editDraft[other].delete(code);
   chip.closest(".memo-card").querySelectorAll("[data-group]").forEach((c) =>
     c.setAttribute("aria-pressed", String(editDraft[c.dataset.group].has(c.dataset.code))),
   );
@@ -407,8 +432,6 @@ function saveEdit(g) {
   const fields = {
     allergies: [...editDraft.avoid].filter((c) => c.startsWith("allergy_")),
     diet: [...editDraft.avoid].filter((c) => c.startsWith("diet_")),
-    likes: [...editDraft.likes],
-    dislikes: [...editDraft.dislikes],
     needs: NEEDS.filter((n) => editDraft.needs.has(n)),
     memo: document.getElementById("edit-memo").value.trim(),
   };

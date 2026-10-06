@@ -32,7 +32,9 @@ function renderReviewDue() {
   const confirmed = draft?.confirmed;
   if (!profile || !confirmed) return;
   const posted = (load(KEYS.reviews) ?? []).some((v) => v.confirmed_at === confirmed.confirmedAt);
-  if (posted) return;
+  // ⑤에서 "다음에 하기"를 누른 후기는 홈에서 다시 알리지 않아요
+  const later = (load(KEYS.reviewLater) ?? []).includes(confirmed.confirmedAt);
+  if (posted || later) return;
   const row = document.getElementById("review-due");
   document.getElementById("review-due-label").textContent = confirmed.name;
   row.hidden = false;

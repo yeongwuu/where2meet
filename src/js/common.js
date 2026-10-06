@@ -9,6 +9,7 @@ export const KEYS = {
   requests: "w2m.requests", // ② 취향 입력을 부탁한 사람 { id: 보낸 시각 }
   reviews: "w2m.reviews", // ⑤ 내가 올린 후기
   guestMemos: "w2m.guestMemos", // ⑤ 고친 비회원 메모 { 비회원 id: 바뀐 필드 }
+  reviewLater: "w2m.reviewLater", // ⑤ "다음에 하기"를 누른 후기 (확정 시각 confirmedAt 목록). 홈 알림에서 빼요
 };
 
 // 체험 계정: 가상 동료 '하늘'(members.json p01)
