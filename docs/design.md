@@ -284,4 +284,3 @@ fallback: `-apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif` ·
 - 유지: 카드 3개, ✓/⚠ 목록, 1순위 주황 테두리와 처음부터 펼친 상태
 - 바꿀 것: 펼친 카드 안 후기는 1개만, 카드 그림자를 지금보다 연하게
 ```
-
