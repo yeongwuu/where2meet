@@ -151,6 +151,11 @@ function walkOver(r) {
   return Math.max(0, r.walk_min - limit);
 }
 
+// 남는 자리가 3 이하면 빠듯해요
+const isTight = (r, need) => r.capacity - need.size <= ROOM_TIGHT;
+// 임원·상사·거래처가 함께하거나 접대면 룸이 필요해요 (③에서 모임 성격을 끄면 따지지 않아요)
+const needsRoom = (need) => apply.character && Boolean(need.exec || need.boss || need.client);
+
 // 4-3 점수 + 4-4 근거 문장. ③에서 끈 항목은 점수와 근거에서 빼요
 function scoreOf(r, need) {
   const list = known();
@@ -160,27 +165,18 @@ function scoreOf(r, need) {
   const warn = [];
   let score = 0;
 
-  // 못 먹는 것: 조건 거르기를 통과했으니 늘 ✓
-  const allergyNames = Object.keys(ALLERGY).filter((c) => need.allergies[c]).map((c) => ALLERGY[c]);
-  const dietNames = Object.keys(DIET).filter((c) => need.diets[c]).map((c) => DIET[c]);
-  if (allergyNames.length) ok.push(`${josa(allergyNames.join("·"), "이", "가")} 주재료가 아니에요`);
-  if (dietNames.length) {
-    ok.push(`${dietNames.join("·")} 메뉴를 준비할 수 있어요`);
-    warn.push(`${dietNames.join("·")} 메뉴는 예약할 때 미리 요청해 주세요`);
-  }
+  // 카드의 추천 이유(ok·warn)는 술·분위기·오늘 안 당기는 음식만 짧게 보여 줘요.
+  // 못 먹는 것·식단·룸·인원·예산·도보는 펼친 카드의 "기준 체크"에만 보여 줘요 (겹치지 않게)
 
   // 예산: 범위 안이면 +20, 벗어난 5천원마다 −10 (5천원 → +10, 1만원 → 0, 1.5만원 → −10, 2만원 이상 → −20)
   const gap = budgetGap(r);
   const budgetFit = gap === 0;
   score += Math.max(BUDGET_FLOOR, WEIGHT.budget - Math.ceil(Math.abs(gap) / BUDGET_STEP) * BUDGET_STEP_POINTS);
-  if (gap > 0) warn.push(`예산보다 1인 ${won(gap)} 비싸요`);
-  if (gap < 0) warn.push(`예산보다 1인 ${won(-gap)} 저렴해요`);
 
   // 도보: 시간 안이면 20, 넘은 1분마다 −4
   const over = walkOver(r);
   const walkFit = over === 0;
   score += Math.max(0, WEIGHT.walk - over * WALK_MINUTE_POINTS);
-  if (over) warn.push(`회사에서 도보 ${r.walk_min}분이라 ${over}분 더 걸려요`);
 
   // 오늘 안 당기는 음식: 안 당기는 사람 비율 × 30 감점. 누가 골랐는지는 드러내지 않아요
   if (apply.food && list.length) {
@@ -219,22 +215,10 @@ function scoreOf(r, need) {
   }
 
   // 룸·자리: 자리 여유가 있으면 20, 빠듯하면(남는 자리 3 이하) 10. 룸이 필요한 모임인데 룸이 없으면 −10
-  const tight = r.capacity - need.size <= ROOM_TIGHT;
+  const tight = isTight(r, need);
   let roomScore = tight ? WEIGHT.room / 2 : WEIGHT.room;
-  if (tight) warn.push(`${r.private_room ? "룸이" : "최대"} ${r.capacity}인이라 인원이 늘면 어려워요`);
-  const needsRoom = need.exec || need.boss || need.client;
-  let roomFit = false;
-  if (apply.character && needsRoom) {
-    if (r.private_room) {
-      roomFit = true;
-      ok.push(`룸 ${r.capacity}인 · ${withWhom(need)} 모시기 좋아요`);
-    } else {
-      roomScore -= WEIGHT.room / 2;
-      warn.push("룸이 없어요. 자리 배치를 미리 확인해 주세요");
-    }
-  } else if (r.private_room) {
-    ok.push(`룸 ${r.capacity}인`);
-  }
+  const roomFit = needsRoom(need) && r.private_room;
+  if (needsRoom(need) && !r.private_room) roomScore -= WEIGHT.room / 2;
   score += Math.max(0, roomScore);
 
   return { r, score, notTodayPeople, ok, warn, drinkFit, roomFit, budgetFit, walkFit };
@@ -280,12 +264,41 @@ function meetingWhen() {
 }
 
 // 영업시간 · 휴무 · 주차 · 정보 확인일 한 줄. 없는 값은 빼요
-function infoLine(r) {
-  const closed = r.closed?.length ? `휴무 ${r.closed.map((c) => WEEKDAY[DAY_CODES.indexOf(c)]).join("·")}요일` : r.closed && "휴무 없음";
-  const parking = r.parking === undefined ? null : r.parking ? `주차 ${r.parking}대` : "주차 안 돼요";
-  const checked = r.info_checked && `정보 확인일 ${r.info_checked.replaceAll("-", ".")}`;
-  const parts = [r.hours?.replace("-", "~"), closed, parking, checked].filter(Boolean);
-  return parts.length ? parts.join(" · ") : "영업시간 · 주차는 정보 준비 중이에요";
+// "11:00-02:00" → "11:00 - 다음 날 02:00"
+function hoursText(hours) {
+  const [open, close] = hours.split("-");
+  return close < open ? `${open} - 다음 날 ${close}` : `${open} - ${close}`;
+}
+
+// 펼친 카드 맨 위 식당 정보: 영업시간 · 휴무 · 주차 · 참고 (주소·전화번호는 보여 주지 않아요)
+// last_order · break_time · notes는 있는 식당만 보여 줘요 (data_spec 3-2)
+function infoHtml(r) {
+  const row = (iconName, title, lines) =>
+    `<li class="info-row">${icon(iconName)}<div><p class="info-title">${title}</p>${lines.map((l) => `<p class="info-text">${l}</p>`).join("")}</div></li>`;
+  const days = (codes) => codes.map((c) => WEEKDAY[DAY_CODES.indexOf(c)]).join("·");
+
+  const rows = [];
+  if (r.hours) {
+    const lines = [r.closed?.length ? hoursText(r.hours) : `매일 ${hoursText(r.hours)}`];
+    if (r.break_time) lines.push(`브레이크타임 ${hoursText(r.break_time)}`);
+    if (r.last_order) lines.push(`라스트 오더 ${r.last_order}`);
+    rows.push(row("clock", "영업시간", lines));
+  }
+  if (r.closed) rows.push(row("calendar-x", "휴무", [r.closed.length ? `매주 ${days(r.closed)}요일 정기휴무` : "연중무휴"]));
+  if (r.parking !== undefined) rows.push(row("car", "주차", [r.parking ? `${r.parking}대 주차할 수 있어요` : "주차 공간이 따로 없어요"]));
+  if (r.notes?.length) rows.push(row("info", "참고", r.notes));
+
+  if (!rows.length) return `<p class="info-checked">영업시간 · 주차는 정보 준비 중이에요</p>`;
+  const checked = r.info_checked ? `<p class="info-checked">정보 확인일 ${r.info_checked.replaceAll("-", ".")}</p>` : "";
+  return `<ul class="info-list">${rows.join("")}</ul>${checked}`;
+}
+
+// 기준 체크의 룸·인원 줄. 오른쪽 근거: 인원, 룸이 필요하면 누가 함께하는지, 빠듯하면 남는 자리
+function roomRow(r, need) {
+  const basis = [`${need.size}명`, needsRoom(need) && `${withWhom(need)} 동석`, isTight(r, need) && `여유 ${r.capacity - need.size}자리`];
+  const label = r.private_room ? `룸 ${r.capacity}인` : needsRoom(need) ? `룸 없음 · 최대 ${r.capacity}명` : `최대 ${r.capacity}명`;
+  const off = (needsRoom(need) && !r.private_room) || isTight(r, need);
+  return [label, basis.filter(Boolean).join(" · "), off];
 }
 
 // 30000 → "약 3만원"
@@ -367,7 +380,7 @@ function cardHtml(item, rank, need) {
         </div>
       </div>
       <p class="like-box">${likeBox}</p>
-      <ul class="reasons">${reasons}</ul>
+      ${reasons ? `<ul class="reasons" aria-label="추천 이유">${reasons}</ul>` : ""}
       <div class="rec-detail" id="detail-${r.id}" ${open ? "" : "hidden"}>
         ${detailHtml(r, need, mine, confirmed)}
       </div>
@@ -388,7 +401,7 @@ function detailHtml(r, need, mine, confirmed) {
       ? [`${allergyCodes.map((c) => ALLERGY[c]).join("·")} 없음`, `알레르기 ${allergyPeople}명`]
       : ["알려진 알레르기 없음", "해당 없음"],
     dietNames.length && [`${dietNames.join("·")} 대응`, "예약 때 미리 요청"],
-    [r.private_room ? `룸 ${r.capacity}인` : `최대 ${r.capacity}명`, `${need.size}명`],
+    roomRow(r, need),
     [`1인 ${price(r.price_per_person)}`, `예산 ${budgetLabel(meeting.budget ?? [0, BUDGET_MAX])}`, budgetGap(r) !== 0],
     meeting.place === "place_office" && r.walk_min !== undefined && [`회사에서 도보 ${r.walk_min}분`, walkLimit ? `${walkLimit}분 이내` : "", walkOver(r) > 0],
   ].filter(Boolean);
@@ -399,6 +412,8 @@ function detailHtml(r, need, mine, confirmed) {
     : "";
 
   return `
+    <h4 class="detail-title">식당 정보</h4>
+    ${infoHtml(r)}
     <h4 class="detail-title">${meetingName()} 기준 체크</h4>
     <ul class="check-list">
       ${rows
@@ -409,7 +424,6 @@ function detailHtml(r, need, mine, confirmed) {
         )
         .join("")}
     </ul>
-    <p class="info-line">${infoLine(r)}</p>
     ${reviewBlock}
     <div class="rec-actions">
       <button type="button" class="btn-secondary" data-action="copy">${icon("copy", "icon-sm")}공지 문구 복사</button>

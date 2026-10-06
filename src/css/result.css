@@ -256,8 +256,45 @@
   white-space: nowrap;
 }
 
-.info-line {
+/* 식당 정보: 아이콘 + 제목 + 내용 줄 */
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
   margin: 0;
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-box);
+  background: var(--bg-subtle);
+  list-style: none;
+}
+
+.info-row {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.info-row .icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.info-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.info-text {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.info-checked {
+  margin: calc(-1 * var(--space-4)) 0 0;
   color: var(--text-sub);
   font-size: 12px;
 }
