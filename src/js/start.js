@@ -135,7 +135,7 @@ function validate() {
 // ---------- 저장 · 불러오기 ----------
 
 // 화면 입력 → members.json과 같은 모양의 프로필
-// likes·dislikes는 더 이상 묻지 않아요. 이전에 저장한 값은 저장할 때 그대로 남겨요 (③·④가 아직 써요)
+// likes·dislikes는 더 이상 묻지 않아요. 이전에 저장한 값은 저장할 때 그대로 남겨요 (③·④도 이제 쓰지 않아요)
 function readForm() {
   const withoutNone = (values) => values.filter((v) => v !== NONE);
   return {

@@ -10,7 +10,7 @@ const TOP_N = 3;
 // 점수 가중치 (data_spec.md 4-3 표와 같아요). 바꾸면 표도 같이 고쳐요
 // 예산·도보·술·분위기·룸 각 20점 = 최대 100점, 오늘 안 당기는 음식은 최대 −30점
 const WEIGHT = {
-  budget: 20, // 예산 안이면 20, 범위 밖 5천원마다 −5
+  budget: 20, // 예산 안이면 +20, 범위 밖 5천원마다 −10 (최저 −20)
   walk: 20, // 도보 시간 안이면 20, 1분 넘을 때마다 −4
   drink: 20, // 술 결론과 같으면 20, 한 단계 차이 10, 두 단계 0
   mood: 20, // 분위기 결론과 같으면 20, 상관없음 10, 반대 0
@@ -18,7 +18,9 @@ const WEIGHT = {
   notToday: 30, // 오늘 안 당기는 사람 비율 × 30 만큼 감점
 };
 const BUDGET_STEP = 5000; // 예산 범위 밖 이만큼마다
-const BUDGET_STEP_POINTS = 5; // 이만큼 깎아요
+const BUDGET_STEP_POINTS = 10; // 이만큼 깎아요
+const BUDGET_FLOOR = -20; // 예산 점수는 여기까지만 내려가요
+const BUDGET_OVER_LIMIT = 15000; // 예산 최대보다 이만큼 이상 비싸면 걸러요
 const WALK_MINUTE_POINTS = 4; // 도보 시간을 1분 넘을 때마다 깎는 점수
 
 // 술: 덜 마시는 순서. 결론은 ③과 같은 방식 (같은 수면 덜 마시는 쪽)
@@ -42,7 +44,8 @@ const DAY_CODES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const FOOD_PHRASE = { ...FOOD, food_asian: "아시안 음식" };
 const ROOM_TIGHT = 3; // 최대 인원 - 모임 인원이 이 이하면 ⚠
 
-const apply = { character: true, food: true, drink: true, ...meeting?.apply };
+// ③의 스위치. 음식 스위치는 ③에서 없앴으니 오늘 안 당기는 음식은 늘 반영해요
+const apply = { character: true, drink: true, ...meeting?.apply, food: true };
 let people = [];
 let wholeTeam = false;
 let ranked = []; // 조건을 지킨 식당, 점수 높은 순
@@ -110,11 +113,12 @@ function groupNeeds() {
 }
 
 // 4-2 조건 거르기: 하나라도 어기면 빼요. 못 먹는 것과 갈 수 없는 곳(인원 초과·휴무·영업시간 밖)만 걸러요
-// 예산·도보는 거르지 않고 점수로 반영해요 (4-3)
+// 예산은 최대보다 1.5만원 이상 비싼 곳만 거르고, 나머지 예산·도보는 점수로 반영해요 (4-3)
 function passes(r, need) {
   if (overlaps(r.allergens, Object.keys(need.allergies))) return false;
   if (Object.keys(need.diets).some((d) => !r.diet_ok.includes(d))) return false;
   if (r.capacity < need.size) return false;
+  if (budgetGap(r) >= BUDGET_OVER_LIMIT) return false;
   const date = meetingDate();
   if (date && r.closed?.includes(DAY_CODES[date.getDay()])) return false;
   if (meeting.time && r.hours && !isOpenAt(r.hours, meeting.time)) return false;
@@ -165,10 +169,10 @@ function scoreOf(r, need) {
     warn.push(`${dietNames.join("·")} 메뉴는 예약할 때 미리 요청해 주세요`);
   }
 
-  // 예산: 범위 안이면 20, 벗어난 5천원마다 −5
+  // 예산: 범위 안이면 +20, 벗어난 5천원마다 −10 (5천원 → +10, 1만원 → 0, 1.5만원 → −10, 2만원 이상 → −20)
   const gap = budgetGap(r);
   const budgetFit = gap === 0;
-  score += Math.max(0, WEIGHT.budget - Math.ceil(Math.abs(gap) / BUDGET_STEP) * BUDGET_STEP_POINTS);
+  score += Math.max(BUDGET_FLOOR, WEIGHT.budget - Math.ceil(Math.abs(gap) / BUDGET_STEP) * BUDGET_STEP_POINTS);
   if (gap > 0) warn.push(`예산보다 1인 ${won(gap)} 비싸요`);
   if (gap < 0) warn.push(`예산보다 1인 ${won(-gap)} 저렴해요`);
 

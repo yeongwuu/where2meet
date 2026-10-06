@@ -1,5 +1,5 @@
 // ③ 취향 종합: ②에서 저장한 모임(w2m.meeting)의 사람들 취향을 모아 보여 줘요. 계산은 docs/data_spec.md 4-1 기준
-import { FOOD, ALLERGY, DIET, RANK_ROLE, PURPOSE, DAY, PLACE } from "./labels.js";
+import { ALLERGY, DIET, RANK_ROLE, PURPOSE, DAY, PLACE } from "./labels.js";
 import { KEYS, PAGES, load, save, loadData, goTo, toast, budgetLabel } from "./common.js";
 
 const profile = load(KEYS.profile);
@@ -7,8 +7,7 @@ const meeting = load(KEYS.meeting);
 const SELF_ID = profile?.id ?? "me";
 
 // 스위치로 끌 수 있는 항목 (반드시 피할 것은 끌 수 없어요). ④에서 꺼진 항목은 점수에서 빼요
-const DEFAULT_APPLY = { character: true, food: true, drink: true };
-const FOOD_LIMIT = 6; // 좋아하는 음식 막대는 많은 순으로 이만큼만
+const DEFAULT_APPLY = { character: true, drink: true };
 
 // 비율 막대: 왼쪽부터 primary-soft → primary-mid → primary 순서
 const DRINK_PARTS = [
@@ -126,41 +125,6 @@ function renderCharacter() {
   document.getElementById("character-lines").innerHTML = lines.map((l) => `<li>${l}</li>`).join("");
 }
 
-// ---------- 다 같이 좋아하는 음식 ----------
-
-function renderFood() {
-  const list = known();
-  const likes = countBy(list, (p) => p.likes);
-  const dislikes = countBy(list, (p) => p.dislikes);
-  const foods = Object.keys(FOOD)
-    .filter((c) => likes[c])
-    .sort((a, b) => likes[b] - likes[a] || (dislikes[a] ?? 0) - (dislikes[b] ?? 0))
-    .slice(0, FOOD_LIMIT);
-
-  document.getElementById("food-bars").innerHTML = foods.length
-    ? foods
-        .map((c) => {
-          const pct = Math.round((likes[c] / list.length) * 100);
-          const bad = dislikes[c] ? ` · <span class="is-caution">별로 ${dislikes[c]}</span>` : "";
-          return `
-            <li class="food-row">
-              <span class="food-name">${FOOD[c]}</span>
-              <span class="bar" role="img" aria-label="${list.length}명 중 ${likes[c]}명이 좋아함"><span class="bar-fill" style="width:${pct}%"></span></span>
-              <span class="food-count">좋아함 ${likes[c]}${bad}</span>
-            </li>`;
-        })
-        .join("")
-    : `<li class="empty">아직 좋아하는 음식을 입력한 사람이 없어요</li>`;
-
-  // 별로가 많은 음식은 점수에서 빼요 (data_spec 5장: 샘플 데이터에는 아직 dislikes가 없어요)
-  const disliked = Object.keys(FOOD)
-    .filter((c) => dislikes[c])
-    .sort((a, b) => dislikes[b] - dislikes[a])
-    .map((c) => `${FOOD[c]} ${dislikes[c]}명`);
-  document.getElementById("food-note").textContent =
-    `취향을 입력한 ${list.length}명 기준` + (disliked.length ? ` · 별로: ${disliked.join(", ")}은 점수에서 빼요` : "");
-}
-
 // ---------- 술·분위기 ----------
 
 function ratioBar(title, parts, counts) {
@@ -272,7 +236,6 @@ async function init() {
   renderStats();
   renderAvoid();
   renderCharacter();
-  renderFood();
   renderDrink();
   renderUnknown();
   syncSwitches();

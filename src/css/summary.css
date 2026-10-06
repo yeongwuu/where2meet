@@ -185,52 +185,6 @@
   font-weight: 700;
 }
 
-/* 취향 막대: 음식명 / 막대 / 좋아함·별로 */
-.food-bars {
-  margin: 0 0 var(--space-12);
-  padding: 0;
-  list-style: none;
-}
-
-.food-row {
-  display: grid;
-  grid-template-columns: 72px 1fr 92px;
-  align-items: center;
-  gap: var(--space-8);
-  padding: 5px 0;
-}
-
-.food-name {
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.bar {
-  height: 10px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-subtle);
-  overflow: hidden;
-}
-
-.bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: var(--primary);
-}
-
-.food-count {
-  color: var(--text-sub);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.empty {
-  color: var(--text-sub);
-  font-size: 13px;
-}
-
 /* 비율 막대: 3구간 */
 .ratio-title {
   margin: 0 0 var(--space-8);
