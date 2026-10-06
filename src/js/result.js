@@ -8,13 +8,18 @@ const SELF_ID = profile?.id ?? "me";
 
 const TOP_N = 3;
 // 점수 가중치 (data_spec.md 4-3 표와 같아요). 바꾸면 표도 같이 고쳐요
+// 예산·도보·술·분위기·룸 각 20점 = 최대 100점, 오늘 안 당기는 음식은 최대 −30점
 const WEIGHT = {
-  food: 50, // 식당 음식을 좋아하는 사람 비율 × 50
-  dislike: 30, // 식당 음식을 별로라고 한 사람 비율 × 30 만큼 감점
-  drink: 20, // 술 결론과 같으면
-  mood: 15, // 분위기 결론과 같으면 +, 반대면 −
-  room: 15, // 임원·상사 동석이나 접대인데 룸이 있으면
+  budget: 20, // 예산 안이면 20, 범위 밖 5천원마다 −5
+  walk: 20, // 도보 시간 안이면 20, 1분 넘을 때마다 −4
+  drink: 20, // 술 결론과 같으면 20, 한 단계 차이 10, 두 단계 0
+  mood: 20, // 분위기 결론과 같으면 20, 상관없음 10, 반대 0
+  room: 20, // 자리 여유 있으면 20, 빠듯하면 10. 룸이 필요한 모임인데 룸이 없으면 −10
+  notToday: 30, // 오늘 안 당기는 사람 비율 × 30 만큼 감점
 };
+const BUDGET_STEP = 5000; // 예산 범위 밖 이만큼마다
+const BUDGET_STEP_POINTS = 5; // 이만큼 깎아요
+const WALK_MINUTE_POINTS = 4; // 도보 시간을 1분 넘을 때마다 깎는 점수
 
 // 술: 덜 마시는 순서. 결론은 ③과 같은 방식 (같은 수면 덜 마시는 쪽)
 const DRINK_ORDER = ["drink_none", "drink_light", "drink_enjoy"];
@@ -33,7 +38,7 @@ const MOOD_OPPOSITE ={ mood_quiet: "mood_lively", mood_lively: "mood_quiet" };
 const WEEKDAY = ["일", "월", "화", "수", "목", "금", "토"];
 // restaurants.json closed 코드 (Date.getDay() 순서)
 const DAY_CODES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-// "n명이 OO을 별로라고 했어요"에 쓰는 음식 이름
+// "n명이 오늘은 OO이 안 당긴대요"에 쓰는 음식 이름
 const FOOD_PHRASE = { ...FOOD, food_asian: "아시안 음식" };
 const ROOM_TIGHT = 3; // 최대 인원 - 모임 인원이 이 이하면 ⚠
 
@@ -104,17 +109,12 @@ function groupNeeds() {
   };
 }
 
-// 4-2 조건 거르기: 하나라도 어기면 빼요
+// 4-2 조건 거르기: 하나라도 어기면 빼요. 못 먹는 것과 갈 수 없는 곳(인원 초과·휴무·영업시간 밖)만 걸러요
+// 예산·도보는 거르지 않고 점수로 반영해요 (4-3)
 function passes(r, need) {
-  const [min, max] = meeting.budget ?? [0, BUDGET_MAX];
   if (overlaps(r.allergens, Object.keys(need.allergies))) return false;
   if (Object.keys(need.diets).some((d) => !r.diet_ok.includes(d))) return false;
   if (r.capacity < need.size) return false;
-  if (r.price_per_person < min) return false;
-  if (max < BUDGET_MAX && r.price_per_person > max) return false;
-  // 도보 시간은 회사 기준 데이터만 있어요. 역에서 모일 때는 거르지 않아요 (data_spec 5장)
-  const walkLimit = walkLimitMin();
-  if (meeting.place === "place_office" && walkLimit && r.walk_min > walkLimit) return false;
   const date = meetingDate();
   if (date && r.closed?.includes(DAY_CODES[date.getDay()])) return false;
   if (meeting.time && r.hours && !isOpenAt(r.hours, meeting.time)) return false;
@@ -132,11 +132,26 @@ function isOpenAt(hours, time) {
   return close > open ? t >= open && t < close : t >= open || t < close;
 }
 
+// 예산 범위 밖으로 벗어난 금액 (+면 비쌈, −면 저렴함, 0이면 범위 안)
+function budgetGap(r) {
+  const [min, max] = meeting.budget ?? [0, BUDGET_MAX];
+  if (max < BUDGET_MAX && r.price_per_person > max) return r.price_per_person - max;
+  if (r.price_per_person < min) return r.price_per_person - min;
+  return 0;
+}
+
+// 도보 시간을 넘은 분 (회사에서 모일 때만. 역 기준 데이터는 아직 없어요, data_spec 5장)
+function walkOver(r) {
+  const limit = walkLimitMin();
+  if (meeting.place !== "place_office" || !limit || r.walk_min === undefined) return 0;
+  return Math.max(0, r.walk_min - limit);
+}
+
 // 4-3 점수 + 4-4 근거 문장. ③에서 끈 항목은 점수와 근거에서 빼요
 function scoreOf(r, need) {
   const list = known();
-  const likers = list.filter((p) => overlaps(p.likes, r.food)).length;
-  const dislikers = list.filter((p) => overlaps(p.dislikes, r.food) && !overlaps(p.likes, r.food)).length;
+  // 오늘 안 당기는 사람: 식당 음식 중 하나라도 not_today에 있는 사람
+  const notTodayPeople = list.filter((p) => overlaps(p.not_today, r.food)).length;
   const ok = [];
   const warn = [];
   let score = 0;
@@ -150,61 +165,75 @@ function scoreOf(r, need) {
     warn.push(`${dietNames.join("·")} 메뉴는 예약할 때 미리 요청해 주세요`);
   }
 
+  // 예산: 범위 안이면 20, 벗어난 5천원마다 −5
+  const gap = budgetGap(r);
+  const budgetFit = gap === 0;
+  score += Math.max(0, WEIGHT.budget - Math.ceil(Math.abs(gap) / BUDGET_STEP) * BUDGET_STEP_POINTS);
+  if (gap > 0) warn.push(`예산보다 1인 ${won(gap)} 비싸요`);
+  if (gap < 0) warn.push(`예산보다 1인 ${won(-gap)} 저렴해요`);
+
+  // 도보: 시간 안이면 20, 넘은 1분마다 −4
+  const over = walkOver(r);
+  const walkFit = over === 0;
+  score += Math.max(0, WEIGHT.walk - over * WALK_MINUTE_POINTS);
+  if (over) warn.push(`회사에서 도보 ${r.walk_min}분이라 ${over}분 더 걸려요`);
+
+  // 오늘 안 당기는 음식: 안 당기는 사람 비율 × 30 감점. 누가 골랐는지는 드러내지 않아요
   if (apply.food && list.length) {
-    score += (WEIGHT.food * likers) / list.length;
-    score -= (WEIGHT.dislike * dislikers) / list.length;
-    // 음식마다 "1명이 아시안 음식을 별로라고 했어요" (좋아하는 음식이 같이 있는 사람은 빼요)
+    score -= (WEIGHT.notToday * notTodayPeople) / list.length;
     r.food.forEach((code) => {
-      const n = list.filter((p) => p.dislikes?.includes(code) && !overlaps(p.likes, r.food)).length;
-      if (n) warn.push(`${n}명이 ${josa(FOOD_PHRASE[code], "을", "를")} 별로라고 했어요`);
+      const n = list.filter((p) => p.not_today?.includes(code)).length;
+      if (n) warn.push(`${n}명이 오늘은 ${josa(FOOD_PHRASE[code], "이", "가")} 안 당긴대요`);
     });
   }
 
   let drinkFit = false;
   if (apply.drink && need.drink) {
-    // 결론과 같으면 전부, 한 단계 차이(예: 술자리 중심 ↔ 반주 가능)면 절반, 두 단계면 0점 + ⚠
-    const gap = Math.abs(DRINK_ORDER.indexOf(r.drink) - DRINK_ORDER.indexOf(need.drink));
-    if (gap === 0) {
+    // 결론과 같으면 20, 한 단계 차이(예: 술자리 중심 ↔ 반주 가능)면 10, 두 단계면 0 + ⚠
+    const step = Math.abs(DRINK_ORDER.indexOf(r.drink) - DRINK_ORDER.indexOf(need.drink));
+    if (step === 0) {
       score += WEIGHT.drink;
       drinkFit = true;
       ok.push(DRINK_FIT[r.drink]);
-    } else if (gap === 1) {
+    } else if (step === 1) {
       score += WEIGHT.drink / 2;
     } else {
       warn.push(DRINK_MISMATCH[r.drink]);
     }
   }
 
-  if (apply.drink && need.mood !== "mood_any" && r.mood !== "mood_any") {
-    if (r.mood === need.mood) {
+  // 분위기: 결론과 같으면 20, 어느 한쪽이 상관없음이면 10, 정반대면 0 + ⚠
+  if (apply.drink && need.mood) {
+    if (need.mood === "mood_any" || r.mood === "mood_any") {
+      score += WEIGHT.mood / 2;
+    } else if (r.mood === need.mood) {
       score += WEIGHT.mood;
       ok.push(r.mood === "mood_quiet" ? "조용해서 대화하기 좋아요" : "활기찬 분위기예요");
     } else if (r.mood === MOOD_OPPOSITE[need.mood]) {
-      score -= WEIGHT.mood;
       warn.push(r.mood === "mood_lively" ? "활기찬 곳이라 대화가 어려울 수 있어요" : "조용한 곳이라 분위기가 차분해요");
     }
   }
 
+  // 룸·자리: 자리 여유가 있으면 20, 빠듯하면(남는 자리 3 이하) 10. 룸이 필요한 모임인데 룸이 없으면 −10
+  const tight = r.capacity - need.size <= ROOM_TIGHT;
+  let roomScore = tight ? WEIGHT.room / 2 : WEIGHT.room;
+  if (tight) warn.push(`${r.private_room ? "룸이" : "최대"} ${r.capacity}인이라 인원이 늘면 어려워요`);
   const needsRoom = need.exec || need.boss || need.client;
   let roomFit = false;
   if (apply.character && needsRoom) {
     if (r.private_room) {
-      score += WEIGHT.room;
       roomFit = true;
       ok.push(`룸 ${r.capacity}인 · ${withWhom(need)} 모시기 좋아요`);
     } else {
+      roomScore -= WEIGHT.room / 2;
       warn.push("룸이 없어요. 자리 배치를 미리 확인해 주세요");
     }
   } else if (r.private_room) {
     ok.push(`룸 ${r.capacity}인`);
   }
+  score += Math.max(0, roomScore);
 
-  // 인원 여유: 목업 "룸이 12인이라 인원이 늘면 어려워요"
-  if (r.capacity - need.size <= ROOM_TIGHT) {
-    warn.push(`${r.private_room ? "룸이" : "최대"} ${r.capacity}인이라 인원이 늘면 어려워요`);
-  }
-
-  return { r, score, likers, ok, warn, drinkFit, roomFit };
+  return { r, score, notTodayPeople, ok, warn, drinkFit, roomFit, budgetFit, walkFit };
 }
 
 function withWhom(need) {
@@ -273,7 +302,8 @@ function renderSummary(need) {
   const best = ranked[0];
   const focus = [];
   if (best.roomFit) focus.push(`${josa(withWhom(need), "이", "가")} 함께해도 편한 룸이 있는 곳`);
-  if (apply.food && best.likers) focus.push(`다 같이 좋아하는 ${foodName(best.r)}`);
+  if (apply.food && need.known && !best.notTodayPeople) focus.push(`오늘 모두 괜찮은 ${foodName(best.r)}`);
+  if (best.budgetFit && best.walkFit) focus.push("예산과 거리에 맞는 곳");
   if (best.drinkFit) focus.push(`${DRINK_PLACE[need.drink]} 자리`);
 
   const sentences = [focus.length ? `${first}, ${focus.join(" · ")} 위주로 골랐어요.` : `${first}, 조건을 지키는 곳 중에서 골랐어요.`];
@@ -298,7 +328,7 @@ function reviewsOf(r) {
 }
 
 function cardHtml(item, rank, need) {
-  const { r, likers, ok, warn } = item;
+  const { r, notTodayPeople, ok, warn } = item;
   const isTop = rank === 0;
   const open = openId === r.id;
   const mine = reviewsOf(r);
@@ -312,9 +342,11 @@ function cardHtml(item, rank, need) {
     `1인 ${price(r.price_per_person)}`,
   ].filter(Boolean).join(" · ");
 
-  const likeBox = need.known
-    ? `취향 입력한 ${need.known}명 중 ${likers}명이 좋아하는 음식`
-    : "취향을 입력한 사람이 없어요";
+  const likeBox = !need.known
+    ? "취향을 입력한 사람이 없어요"
+    : notTodayPeople
+      ? `취향 입력한 ${need.known}명 중 ${need.known - notTodayPeople}명이 오늘 괜찮은 음식`
+      : `취향 입력한 ${need.known}명 모두 오늘 괜찮은 음식`;
 
   const reasons = [
     ...ok.map((t) => `<li class="reason">${icon("check")}<span>${t}</span></li>`),
@@ -353,8 +385,8 @@ function detailHtml(r, need, mine, confirmed) {
       : ["알려진 알레르기 없음", "해당 없음"],
     dietNames.length && [`${dietNames.join("·")} 대응`, "예약 때 미리 요청"],
     [r.private_room ? `룸 ${r.capacity}인` : `최대 ${r.capacity}명`, `${need.size}명`],
-    [`1인 ${price(r.price_per_person)}`, `예산 ${budgetLabel(meeting.budget ?? [0, BUDGET_MAX])}`],
-    meeting.place === "place_office" && r.walk_min !== undefined && [`회사에서 도보 ${r.walk_min}분`, walkLimit ? `${walkLimit}분 이내` : ""],
+    [`1인 ${price(r.price_per_person)}`, `예산 ${budgetLabel(meeting.budget ?? [0, BUDGET_MAX])}`, budgetGap(r) !== 0],
+    meeting.place === "place_office" && r.walk_min !== undefined && [`회사에서 도보 ${r.walk_min}분`, walkLimit ? `${walkLimit}분 이내` : "", walkOver(r) > 0],
   ].filter(Boolean);
 
   const reviewBlock = mine.length
@@ -365,7 +397,13 @@ function detailHtml(r, need, mine, confirmed) {
   return `
     <h4 class="detail-title">${meetingName()} 기준 체크</h4>
     <ul class="check-list">
-      ${rows.map(([label, basis]) => `<li>${icon("check")}<span class="check-label">${label}</span><span class="check-basis">${basis}</span></li>`).join("")}
+      ${rows
+        .map(([label, basis, off]) =>
+          off
+            ? `<li class="is-warn">${icon("triangle-alert")}<span class="check-label">${label}</span><span class="check-basis">${basis}</span></li>`
+            : `<li>${icon("check")}<span class="check-label">${label}</span><span class="check-basis">${basis}</span></li>`,
+        )
+        .join("")}
     </ul>
     <p class="info-line">${infoLine(r)}</p>
     ${reviewBlock}

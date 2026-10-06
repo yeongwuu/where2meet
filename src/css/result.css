@@ -195,8 +195,14 @@
 }
 
 .reason.is-warn,
-.reason.is-warn .icon {
+.reason.is-warn .icon,
+.check-list li.is-warn .icon,
+.check-list li.is-warn .check-label {
   color: var(--caution);
+}
+
+.check-list li.is-warn .icon {
+  stroke-width: 1.75;
 }
 
 .reason.is-warn .icon {
