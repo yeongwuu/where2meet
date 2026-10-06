@@ -174,7 +174,7 @@
 | `rating` | number | 별점 1~5 |
 | `chips` | string[] | 칩 후기 (예: "룸이 조용해요") |
 | `comment` | string | 한마디 |
-| `guest_notes` | `{guest_id, text}`[] | "OO님에 대해 알게 된 것" → 해당 비회원 `history`에 추가 |
+| `guest_notes` | `{guest_id, text}`[] | 해당 비회원 `history`에 추가돼요. ⑤ 후기 카드의 "OO님에 대해 알게 된 것" 입력칸은 없앴어서, 앞으로 올리는 후기는 `[]`예요 (샘플 후기 값은 그대로) |
 
 ⑤에서 올린 후기는 파일이 아니라 브라우저(`w2m.reviews`)에 저장돼요. id는 `vm` + 숫자이고, 어느 확정에 대한 후기인지 알 수 있게 `confirmed_at`(모임 `confirmed.confirmedAt`과 같은 값)이 붙어요. 이 값이 같은 후기가 있으면 "1건 남음" 카드 대신 "후기를 올렸어요" 한 줄을 보여 줘요.
 

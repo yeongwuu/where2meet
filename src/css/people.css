@@ -107,38 +107,6 @@
   margin-top: var(--space-16);
 }
 
-/* "OO님에 대해 알게 된 것" 박스 */
-.note-box {
-  margin-top: var(--space-12);
-  padding: var(--space-12);
-  border-radius: var(--radius-box);
-  background: var(--bg-subtle);
-}
-
-.note-box-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
-  margin-bottom: var(--space-8);
-}
-
-.note-box-title {
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.badge-white {
-  background: var(--bg);
-  color: var(--text-sub);
-}
-
-.input-sub {
-  height: 44px;
-  font-size: 14px;
-}
-
 .note-box-hint {
   margin: var(--space-4) 0 0;
   color: var(--text-sub);

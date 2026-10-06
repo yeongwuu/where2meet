@@ -70,7 +70,6 @@ const postedReview = () =>
   meeting?.confirmed && myReviews().find((v) => v.confirmed_at === meeting.confirmed.confirmedAt);
 
 // 모임에 같이 간 비회원 (나 빼고)
-const meetingGuests = () => (meeting?.people ?? []).map(guestById).filter(Boolean);
 
 function roleOf(id) {
   if (id === SELF_ID) return null;
@@ -150,8 +149,6 @@ function renderReview() {
       <label class="sr-only" for="review-comment">한마디</label>
       <input class="input review-comment" id="review-comment" maxlength="100" autocomplete="off" placeholder="한마디 남겨 주세요 (선택)">
 
-      ${meetingGuests().map(noteBoxHtml).join("")}
-
       <button type="submit" class="btn-primary review-submit">후기 올리기</button>
       <button type="button" class="link-btn review-later" data-action="later">다음에 하기</button>
     </form>`;
@@ -185,19 +182,6 @@ function writeNow() {
   save(KEYS.reviewLater, laterList().filter((at) => at !== meeting.confirmed.confirmedAt));
   renderReview();
   reviewSlot.querySelector("[data-rating]")?.focus();
-}
-
-// "OO님에 대해 알게 된 것": 모임에 같이 간 비회원마다 하나씩
-function noteBoxHtml(g) {
-  return `
-    <div class="note-box">
-      <div class="note-box-head">
-        <label class="note-box-title" for="note-${g.id}">${esc(g.title)}에 대해 알게 된 것</label>
-        <span class="badge badge-white">나만 보기</span>
-      </div>
-      <input class="input input-sub" id="note-${g.id}" data-guest="${g.id}" maxlength="60" autocomplete="off" placeholder="예: 맵지 않은 메뉴 위주로 드심">
-      <p class="note-box-hint">건강·개인사처럼 민감한 내용은 적지 말아 주세요</p>
-    </div>`;
 }
 
 function doneHtml(withNotes) {
