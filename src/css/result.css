@@ -328,21 +328,46 @@
 }
 
 /* [공지 문구 복사 · 이 식당으로 확정] */
+/* 확정 전: [확정하고 공지 문구 복사] 한 개 / 확정 후: 확정 안내 + [공지 문구 다시 복사] */
 .rec-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-8);
 }
 
+.rec-actions .btn-primary,
 .rec-actions .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  width: 100%;
 }
 
 .rec-actions .btn-secondary .icon {
   color: var(--text);
+}
+
+.confirmed-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-box);
+  background: var(--bg-subtle);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.confirmed-note .icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--check);
+  stroke-width: 2.25;
 }
 
 /* 자세히 보고 확정하기 ▾ / 접기 ▴ */

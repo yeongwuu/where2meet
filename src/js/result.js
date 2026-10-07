@@ -1,6 +1,6 @@
 // ④ 추천 결과: 모임(w2m.meeting)의 사람들로 식당을 거르고 점수를 매겨 3곳을 보여 줘요. 계산은 docs/data_spec.md 4-2·4-3 기준
 import { FOOD, ALLERGY, DIET, RANK_ROLE, PURPOSE, BUDGET_MAX } from "./labels.js";
-import { KEYS, PAGES, load, save, loadData, goTo, toast, icon, setupTabBar, won, budgetLabel } from "./common.js";
+import { KEYS, PAGES, load, save, loadData, toast, icon, setupTabBar, won, budgetLabel } from "./common.js";
 
 const profile = load(KEYS.profile);
 const meeting = load(KEYS.meeting);
@@ -427,8 +427,12 @@ function detailHtml(r, need, mine, confirmed) {
     </ul>
     ${reviewBlock}
     <div class="rec-actions">
-      <button type="button" class="btn-secondary" data-action="copy">${icon("copy", "icon-sm")}공지 문구 복사</button>
-      <button type="button" class="btn-primary btn-sm" data-action="confirm">${confirmed ? "확정했어요" : "이 식당으로 확정"}</button>
+      ${
+        confirmed
+          ? `<p class="confirmed-note">${icon("check")}<span>이 식당으로 확정했어요. 다녀온 뒤 홈에서 후기를 남겨 주세요</span></p>
+             <button type="button" class="btn-secondary" data-action="copy">${icon("copy", "icon-sm")}공지 문구 다시 복사</button>`
+          : `<button type="button" class="btn-primary btn-sm" data-action="confirm">${icon("copy", "icon-sm")}확정하고 공지 문구 복사</button>`
+      }
     </div>`;
 }
 
@@ -481,7 +485,8 @@ function noticeText(r) {
   ].filter(Boolean).join("\n");
 }
 
-async function copyNotice(r) {
+// 복사에 성공하면 true
+async function copyNotice(r, { silent = false } = {}) {
   const text = noticeText(r);
   try {
     await navigator.clipboard.writeText(text);
@@ -497,22 +502,24 @@ async function copyNotice(r) {
     const done = document.execCommand("copy");
     area.remove();
     if (!done) {
-      toast("복사하지 못했어요. 다시 눌러 주세요");
-      return;
+      if (!silent) toast("복사하지 못했어요. 다시 눌러 주세요");
+      return false;
     }
   }
-  toast("공지 문구를 복사했어요");
+  if (!silent) toast("공지 문구를 복사했어요");
+  return true;
 }
 
-function confirmRestaurant(r) {
+// 확정 + 공지 문구 복사를 한 번에. 후기 화면으로 넘어가지 않아요 (확정 → 방문 → 홈의 "후기 남기기"에서 후기)
+async function confirmRestaurant(r) {
+  const changed = Boolean(meeting.confirmed) && meeting.confirmed.restaurant_id !== r.id;
   meeting.confirmed = { restaurant_id: r.id, name: r.name, confirmedAt: new Date().toISOString() };
   save(KEYS.meeting, { ...load(KEYS.meeting), confirmed: meeting.confirmed });
+  const copied = await copyNotice(r, { silent: true });
   renderCards(currentNeed);
-  if (PAGES.people) {
-    goTo("people");
-  } else {
-    toast(`${josa(r.name, "으로", "로")} 확정했어요. 사람·기록 화면은 준비 중이에요`);
-  }
+  document.querySelector(`.rec-card[data-id="${r.id}"] [data-action="copy"]`)?.focus();
+  const done = `${josa(r.name, "으로", "로")} ${changed ? "바꿨어요" : "확정했어요"}`;
+  toast(copied ? `${done}. 공지 문구도 복사했어요` : `${done}. 공지 문구는 아래 버튼으로 다시 복사해 주세요`);
 }
 
 function onListClick(event) {
